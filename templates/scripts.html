@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Panel Myxsi - Scripts</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #4361ee;
+            --secondary: #7209b7;
+            --success: #06ffa5;
+            --danger: #ef476f;
+            --dark-card: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            color: var(--light);
+            padding: 20px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            border: 1px solid rgba(67, 97, 238, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: rgba(67, 97, 238, 0.2);
+            border-radius: 12px;
+            color: var(--primary);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            background: rgba(67, 97, 238, 0.4);
+        }
+
+        .card {
+            background: var(--dark-card);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid var(--primary);
+            padding-left: 15px;
+        }
+
+        .scripts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .script-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .script-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            background: rgba(67, 97, 238, 0.1);
+        }
+
+        .script-card i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .script-card h3 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+            font-family: monospace;
+        }
+
+        .script-card p {
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+
+        .terminal {
+            background: #0a0c10;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .terminal-header {
+            background: #1a1e2a;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .terminal-dot.red { background: #ff5f56; }
+        .terminal-dot.yellow { background: #ffbd2e; }
+        .terminal-dot.green { background: #27c93f; }
+
+        .terminal-body {
+            padding: 15px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            max-height: 400px;
+            overflow-y: auto;
+            background: #0a0c10;
+            color: #00ff9d;
+            white-space: pre-wrap;
+        }
+
+        .btn-ejecutar {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .btn-ejecutar:hover {
+            transform: scale(1.02);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(67, 97, 238, 0.3);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .toast-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--dark-card);
+            border-left: 4px solid var(--primary);
+            padding: 12px 20px;
+            border-radius: 12px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            .header h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-code"></i> Panel Myxsi - Scripts</h1>
+            <a href="/" class="btn-back"><i class="fas fa-arrow-left"></i> Volver al Panel</a>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-list"></i> Scripts Disponibles</div>
+            <div class="scripts-grid" id="scripts-grid">
+                <div class="loading"></div> Cargando scripts...
+            </div>
+        </div>
+
+        <div class="card" id="ejecucion-card" style="display: none;">
+            <div class="card-title"><i class="fas fa-terminal"></i> Ejecución del Script</div>
+            <div class="terminal">
+                <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                    <span>Salida del script</span>
+                </div>
+                <div class="terminal-body" id="script-output"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-plus-circle"></i> Crear Nuevo Script</div>
+            <div style="margin-bottom: 15px;">
+                <input type="text" id="script-nombre" class="terminal-input" style="width: 100%; padding: 12px; background: #1a1e2a; border: 1px solid rgba(67,97,238,0.3); border-radius: 12px; color: white; margin-bottom: 10px;" placeholder="Nombre del script (ej: mi-script.sh)">
+                <textarea id="script-contenido" rows="8" class="terminal-input" style="width: 100%; padding: 12px; background: #1a1e2a; border: 1px solid rgba(67,97,238,0.3); border-radius: 12px; color: white; font-family: monospace;" placeholder="Contenido del script...&#10;#!/bin/bash&#10;echo 'Hola Mundo'"></textarea>
+                <button class="btn-ejecutar" onclick="crearScript()" style="margin-top: 10px;"><i class="fas fa-save"></i> Guardar Script</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cargar scripts al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarScripts();
+        });
+
+        async function cargarScripts() {
+            try {
+                const response = await fetch('/api/servicios'); // No es ideal, pero para cargar scripts necesitamos endpoint específico
+                // Mejor: hacer un fetch a /api/scripts
+                const scriptsResponse = await fetch('/scripts');
+                // Como no tenemos API de scripts aún, usamos los scripts predefinidos
+                const scripts = [
+                    { nombre: 'ejemplo.sh', descripcion: 'Script de ejemplo que muestra información del sistema' },
+                    { nombre: 'limpieza.sh', descripcion: 'Limpia el sistema: apt autoremove, apt autoclean' },
+                    { nombre: 'backup.sh', descripcion: 'Crea un backup de configuración' },
+                    { nombre: 'logs.sh', descripcion: 'Muestra los últimos logs del sistema' }
+                ];
+                
+                const grid = document.getElementById('scripts-grid');
+                if (scripts.length === 0) {
+                    grid.innerHTML = '<div style="text-align: center; color: #64748b;">No hay scripts disponibles. Crea uno nuevo arriba.</div>';
+                    return;
+                }
+                
+                grid.innerHTML = scripts.map(s => `
+                    <div class="script-card" onclick="ejecutarScript('${s.nombre}')">
+                        <i class="fas fa-file-code"></i>
+                        <h3>${s.nombre}</h3>
+                        <p>${s.descripcion}</p>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('scripts-grid').innerHTML = '<div style="text-align: center; color: #ef476f;">Error cargando scripts</div>';
+            }
+        }
+
+        async function ejecutarScript(scriptNombre) {
+            const outputDiv = document.getElementById('ejecucion-card');
+            const outputText = document.getElementById('script-output');
+            outputDiv.style.display = 'block';
+            outputText.innerHTML = '<div class="loading"></div> Ejecutando script...';
+            
+            try {
+                // Scripts predefinidos
+                const scripts = {
+                    'ejemplo.sh': '#!/bin/bash\necho "=== Panel Myxsi ===="\necho "Fecha: $(date)"\necho "Uptime: $(uptime)"\necho "Memoria: $(free -h)"\necho "Disco: $(df -h /)"\n',
+                    'limpieza.sh': '#!/bin/bash\necho "Limpiando sistema..."\nsudo apt autoremove -y\nsudo apt autoclean -y\necho "Limpieza completada"\n',
+                    'backup.sh': '#!/bin/bash\necho "Creando backup..."\ntar -czf /tmp/backup-$(date +%Y%m%d).tar.gz /etc 2>/dev/null\necho "Backup creado en /tmp/backup-$(date +%Y%m%d).tar.gz"\n',
+                    'logs.sh': '#!/bin/bash\necho "Últimos logs del sistema:"\ntail -n 30 /var/log/syslog\n'
+                };
+                
+                const contenido = scripts[scriptNombre] || `#!/bin/bash\necho "Ejecutando ${scriptNombre}..."\n`;
+                
+                // Guardar temporalmente
+                const tempScript = `/tmp/${scriptNombre}`;
+                const saveResponse = await fetch('/api/crear_script', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre: scriptNombre, contenido: contenido })
+                });
+                
+                // Ejecutar
+                const response = await fetch('/api/ejecutar_script', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ script: scriptNombre })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    outputText.innerHTML = data.output || 'Script ejecutado correctamente';
+                } else {
+                    outputText.innerHTML = `<span style="color: #ef476f;">Error: ${data.output}</span>`;
+                }
+            } catch (error) {
+                outputText.innerHTML = `<span style="color: #ef476f;">Error: ${error.message}</span>`;
+            }
+        }
+
+        async function crearScript() {
+            const nombre = document.getElementById('script-nombre').value.trim();
+            const contenido = document.getElementById('script-contenido').value;
+            
+            if (!nombre) {
+                mostrarNotificacion('❌ Por favor ingresa un nombre para el script');
+                return;
+            }
+            
+            if (!contenido) {
+                mostrarNotificacion('❌ Por favor ingresa el contenido del script');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/crear_script', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, contenido })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarNotificacion(`✅ ${data.output}`);
+                    document.getElementById('script-nombre').value = '';
+                    document.getElementById('script-contenido').value = '';
+                    cargarScripts();
+                } else {
+                    mostrarNotificacion(`❌ Error: ${data.output}`);
+                }
+            } catch (error) {
+                mostrarNotificacion(`❌ Error: ${error.message}`);
+            }
+        }
+
+        function mostrarNotificacion(mensaje) {
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = mensaje;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
