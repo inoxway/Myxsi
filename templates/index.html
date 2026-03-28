@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Panel Myxsi</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #4361ee;
+            --secondary: #7209b7;
+            --success: #06ffa5;
+            --danger: #ef476f;
+            --warning: #ffd166;
+            --dark-card: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            color: var(--light);
+            padding: 20px;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            border: 1px solid rgba(67, 97, 238, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .header p { color: var(--gray); margin-top: 8px; }
+
+        .acciones-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn-accion {
+            background: var(--dark-card);
+            border: 1px solid rgba(67, 97, 238, 0.3);
+            border-radius: 20px;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--light);
+        }
+
+        .btn-accion i { font-size: 1.8rem; margin-bottom: 8px; display: block; color: var(--primary); }
+        .btn-accion span { font-size: 0.85rem; font-weight: 500; }
+        .btn-accion:hover { transform: translateY(-3px); border-color: var(--primary); background: rgba(67, 97, 238, 0.1); }
+        .btn-accion.danger:hover i { color: var(--danger); }
+        .btn-accion.warning:hover i { color: var(--warning); }
+
+        .card {
+            background: var(--dark-card);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid var(--primary);
+            padding-left: 15px;
+        }
+
+        .metricas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .metrica {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 15px;
+        }
+
+        .metrica-label { font-size: 0.75rem; text-transform: uppercase; color: var(--gray); letter-spacing: 1px; margin-bottom: 8px; }
+        .metrica-valor { font-size: 1.8rem; font-weight: 700; margin-bottom: 10px; }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        .terminal {
+            background: #0a0c10;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .terminal-header {
+            background: #1a1e2a;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .terminal-dot.red { background: #ff5f56; }
+        .terminal-dot.yellow { background: #ffbd2e; }
+        .terminal-dot.green { background: #27c93f; }
+
+        .terminal-body {
+            padding: 15px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            height: 300px;
+            overflow-y: auto;
+            background: #0a0c10;
+            color: #00ff9d;
+        }
+
+        .terminal-input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .terminal-input {
+            flex: 1;
+            background: #1a1e2a;
+            border: 1px solid rgba(67, 97, 238, 0.3);
+            border-radius: 12px;
+            padding: 12px;
+            color: var(--light);
+            font-family: monospace;
+        }
+
+        .terminal-input:focus { outline: none; border-color: var(--primary); }
+
+        .procesos-table { overflow-x: auto; }
+        .procesos-table table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        .procesos-table th { text-align: left; padding: 12px 8px; background: rgba(255, 255, 255, 0.03); color: var(--gray); }
+        .procesos-table td { padding: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+
+        .cpu-bar { width: 60px; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; overflow: hidden; display: inline-block; }
+        .cpu-bar-fill { height: 100%; background: var(--primary); border-radius: 3px; }
+
+        .estado-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 500; }
+        .estado-active { background: rgba(6, 255, 165, 0.2); color: var(--success); }
+        .estado-inactive { background: rgba(239, 71, 111, 0.2); color: var(--danger); }
+
+        .servicio-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .servicio-nombre { font-family: monospace; font-size: 0.85rem; }
+        .servicio-acciones button {
+            background: transparent;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            padding: 5px 8px;
+            margin: 0 2px;
+            border-radius: 8px;
+        }
+        .servicio-acciones button:hover { background: rgba(67, 97, 238, 0.2); color: var(--primary); }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(67, 97, 238, 0.3);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .toast-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--dark-card);
+            border-left: 4px solid var(--primary);
+            padding: 12px 20px;
+            border-radius: 12px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .btn-scripts {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: white;
+            border: none;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            .header h1 { font-size: 1.8rem; }
+            .acciones-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+            .btn-accion { padding: 12px 5px; }
+            .btn-accion i { font-size: 1.4rem; }
+            .metricas-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .metrica-valor { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-cube"></i> Panel Myxsi</h1>
+            <p>Control Total de tu Servidor Debian</p>
+        </div>
+
+        <div class="acciones-grid">
+            <div class="btn-accion" onclick="abrirTerminal()">
+                <i class="fas fa-terminal"></i>
+                <span>Terminal</span>
+            </div>
+            <div class="btn-accion" onclick="verAlmacenamiento()">
+                <i class="fas fa-hdd"></i>
+                <span>Almacenamiento</span>
+            </div>
+            <div class="btn-accion" onclick="ejecutarAccion('actualizar')">
+                <i class="fas fa-sync-alt"></i>
+                <span>Actualizar</span>
+            </div>
+            <div class="btn-accion btn-scripts" onclick="window.location.href='/scripts'">
+                <i class="fas fa-code"></i>
+                <span>Scripts</span>
+            </div>
+            <div class="btn-accion warning" onclick="ejecutarAccion('reiniciar')">
+                <i class="fas fa-power-off"></i>
+                <span>Reiniciar</span>
+            </div>
+            <div class="btn-accion danger" onclick="ejecutarAccion('apagar')">
+                <i class="fas fa-times-circle"></i>
+                <span>Apagar</span>
+            </div>
+        </div>
+
+        <!-- Estado del Sistema -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-chart-line"></i><span>Estado del Sistema</span></div>
+            <div class="metricas-grid" id="metricas">
+                <div class="metrica">
+                    <div class="metrica-label">CPU</div>
+                    <div class="metrica-valor" id="cpu-valor">--%</div>
+                    <div class="progress-bar-container"><div class="progress-fill" id="cpu-fill" style="width: 0%"></div></div>
+                    <div style="font-size: 0.7rem; margin-top: 8px;" id="cpu-load">Load: --</div>
+                </div>
+                <div class="metrica">
+                    <div class="metrica-label">RAM</div>
+                    <div class="metrica-valor" id="ram-valor">--%</div>
+                    <div class="progress-bar-container"><div class="progress-fill" id="ram-fill" style="width: 0%"></div></div>
+                    <div style="font-size: 0.7rem; margin-top: 8px;" id="ram-detalle">-- / --</div>
+                </div>
+                <div class="metrica">
+                    <div class="metrica-label">DISCO</div>
+                    <div class="metrica-valor" id="disco-valor">--%</div>
+                    <div class="progress-bar-container"><div class="progress-fill" id="disco-fill" style="width: 0%"></div></div>
+                    <div style="font-size: 0.7rem; margin-top: 8px;" id="disco-detalle">-- / --</div>
+                </div>
+                <div class="metrica">
+                    <div class="metrica-label">SISTEMA</div>
+                    <div class="metrica-valor" id="hostname" style="font-size: 1rem;">--</div>
+                    <div style="font-size: 0.7rem;" id="uptime">Uptime: --</div>
+                    <div style="font-size: 0.7rem;" id="temperatura">🌡️ --</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Procesos Activos -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-tasks"></i><span>Procesos Activos</span><span style="margin-left: auto; font-size: 0.7rem;" id="procesos-count"></span></div>
+            <div class="procesos-table">
+                <table>
+                    <thead><tr><th>PID</th><th>Usuario</th><th>Nombre</th><th>CPU%</th><th>MEM%</th><th>Estado</th><th>Acción</th></tr></thead>
+                    <tbody id="procesos-body"><tr><td colspan="7" style="text-align: center;"><div class="loading"></div> Cargando...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Servicios Activos -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-cogs"></i><span>Servicios Activos</span></div>
+            <div id="servicios-lista"><div class="loading"></div> Cargando...</div>
+        </div>
+
+        <!-- Terminal (oculto) -->
+        <div class="card" id="terminal-card" style="display: none;">
+            <div class="card-title"><i class="fas fa-terminal"></i><span>Terminal Interactiva</span><i class="fas fa-times" style="margin-left: auto; cursor: pointer;" onclick="cerrarTerminal()"></i></div>
+            <div class="terminal">
+                <div class="terminal-header"><div class="terminal-dot red"></div><div class="terminal-dot yellow"></div><div class="terminal-dot green"></div><span>bash</span></div>
+                <div class="terminal-body" id="terminal-output">> Terminal lista. Escribe comandos abajo.</div>
+                <div class="terminal-input-group">
+                    <input type="text" class="terminal-input" id="terminal-command" placeholder="Ej: ls, pwd, df -h" onkeypress="handleTerminalKey(event)">
+                    <button class="btn-accion" style="padding: 10px 20px;" onclick="ejecutarComandoTerminal()">Ejecutar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Almacenamiento (oculto) -->
+        <div class="card" id="almacenamiento-card" style="display: none;">
+            <div class="card-title"><i class="fas fa-hdd"></i><span>Almacenamiento</span><i class="fas fa-times" style="margin-left: auto; cursor: pointer;" onclick="cerrarAlmacenamiento()"></i></div>
+            <div id="almacenamiento-content"></div>
+        </div>
+    </div>
+
+    <script>
+        let refreshInterval = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            actualizarEstado();
+            actualizarProcesos();
+            cargarServicios();
+            refreshInterval = setInterval(() => {
+                actualizarEstado();
+                actualizarProcesos();
+            }, 3000);
+        });
+
+        async function actualizarEstado() {
+            try {
+                const response = await fetch('/api/estado');
+                const data = await response.json();
+                
+                if (data.cpu) {
+                    document.getElementById('cpu-valor').textContent = `${data.cpu.porcentaje}%`;
+                    document.getElementById('cpu-fill').style.width = `${data.cpu.porcentaje}%`;
+                    document.getElementById('cpu-load').textContent = `Load: ${data.cpu.load_avg.map(l => l.toFixed(2)).join(', ')}`;
+                }
+                
+                if (data.memoria) {
+                    const ramPorcentaje = data.memoria.porcentaje;
+                    document.getElementById('ram-valor').textContent = `${ramPorcentaje}%`;
+                    document.getElementById('ram-fill').style.width = `${ramPorcentaje}%`;
+                    const ramTotal = (data.memoria.total / 1024 / 1024 / 1024).toFixed(1);
+                    const ramUsado = (data.memoria.usado / 1024 / 1024 / 1024).toFixed(1);
+                    document.getElementById('ram-detalle').textContent = `${ramUsado} / ${ramTotal} GB`;
+                }
+                
+                if (data.disco) {
+                    const discoPorcentaje = data.disco.porcentaje;
+                    document.getElementById('disco-valor').textContent = `${discoPorcentaje}%`;
+                    document.getElementById('disco-fill').style.width = `${discoPorcentaje}%`;
+                    const discoTotal = (data.disco.total / 1024 / 1024 / 1024).toFixed(1);
+                    const discoUsado = (data.disco.usado / 1024 / 1024 / 1024).toFixed(1);
+                    document.getElementById('disco-detalle').textContent = `${discoUsado} / ${discoTotal} GB`;
+                }
+                
+                document.getElementById('hostname').textContent = data.hostname || 'Debian';
+                document.getElementById('uptime').textContent = `Uptime: ${data.uptime || '0m'}`;
+                if (data.temperaturas && data.temperaturas.CPU) {
+                    document.getElementById('temperatura').innerHTML = `🌡️ ${data.temperaturas.CPU}`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function actualizarProcesos() {
+            try {
+                const response = await fetch('/api/procesos');
+                const procesos = await response.json();
+                document.getElementById('procesos-count').textContent = `${procesos.length} procesos`;
+                const tbody = document.getElementById('procesos-body');
+                if (procesos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7">No hay procesos</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = procesos.map(p => `
+                    <tr>
+                        <td>${p.pid}</td>
+                        <td>${p.usuario || '?'}</td>
+                        <td style="font-family: monospace;">${p.nombre.substring(0, 40)}</td>
+                        <td>${p.cpu.toFixed(1)}%<div class="cpu-bar"><div class="cpu-bar-fill" style="width: ${Math.min(p.cpu, 100)}%"></div></div></td>
+                        <td>${p.memoria.toFixed(1)}%</td>
+                        <td><span class="estado-badge ${p.estado === 'running' ? 'estado-active' : 'estado-inactive'}">${p.estado || '?'}</span></td>
+                        <td><button class="btn-accion" style="padding: 5px 10px;" onclick="matarProceso(${p.pid})"><i class="fas fa-skull-crosswalk"></i></button></td>
+                    `
+                ).join('');
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function matarProceso(pid) {
+            if (!confirm(`¿Matar proceso ${pid}?`)) return;
+            try {
+                const response = await fetch('/api/matar_proceso', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pid })
+                });
+                const data = await response.json();
+                mostrarNotificacion(data.success ? `✅ Proceso ${pid} terminado` : `❌ ${data.output}`);
+                if (data.success) setTimeout(actualizarProcesos, 500);
+            } catch (error) {
+                mostrarNotificacion(`❌ Error: ${error.message}`);
+            }
+        }
+
+        async function cargarServicios() {
+            try {
+                const response = await fetch('/api/servicios');
+                const servicios = await response.json();
+                const container = document.getElementById('servicios-lista');
+                if (servicios.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; color: #64748b;">No hay servicios</div>';
+                    return;
+                }
+                container.innerHTML = servicios.slice(0, 15).map(s => `
+                    <div class="servicio-item">
+                        <div class="servicio-nombre"><i class="fas fa-${s.estado === 'active' ? 'play-circle' : 'stop-circle'}" style="color: ${s.estado === 'active' ? '#06ffa5' : '#ef476f'}; margin-right: 8px;"></i>${s.nombre}</div>
+                        <div class="servicio-acciones">
+                            <span class="estado-badge ${s.estado === 'active' ? 'estado-active' : 'estado-inactive'}">${s.estado}</span>
+                            <button onclick="controlServicio('${s.nombre}', 'restart')" title="Reiniciar"><i class="fas fa-sync-alt"></i></button>
+                            <button onclick="controlServicio('${s.nombre}', 'stop')" title="Detener"><i class="fas fa-stop"></i></button>
+                            <button onclick="controlServicio('${s.nombre}', 'start')" title="Iniciar"><i class="fas fa-play"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function controlServicio(servicio, accion) {
+            try {
+                mostrarNotificacion(`Ejecutando ${accion} en ${servicio}...`);
+                const response = await fetch('/api/control_servicio', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ servicio, accion })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    mostrarNotificacion(`✅ ${accion} completado`);
+                    setTimeout(cargarServicios, 1000);
+                } else {
+                    mostrarNotificacion(`❌ Error: ${data.output}`);
+                }
+            } catch (error) {
+                mostrarNotificacion(`❌ Error: ${error.message}`);
+            }
+        }
+
+        async function ejecutarAccion(accion) {
+            if (accion === 'apagar' && !confirm('⚠️ ¿Estás seguro de que quieres APAGAR el sistema?')) return;
+            if (accion === 'reiniciar' && !confirm('⚠️ ¿Estás seguro de que quieres REINICIAR el sistema?')) return;
+            if (accion === 'actualizar') mostrarNotificacion('🔄 Actualizando repositorios...');
+            
+            try {
+                const response = await fetch('/api/ejecutar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comando: accion })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    mostrarNotificacion(`✅ ${accion} ejecutado correctamente`);
+                } else {
+                    mostrarNotificacion(`❌ Error: ${data.output}`);
+                }
+            } catch (error) {
+                mostrarNotificacion(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // Terminal
+        function abrirTerminal() {
+            document.getElementById('terminal-card').style.display = 'block';
+            document.getElementById('terminal-command').focus();
+        }
+        function cerrarTerminal() {
+            document.getElementById('terminal-card').style.display = 'none';
+        }
+        async function ejecutarComandoTerminal() {
+            const input = document.getElementById('terminal-command');
+            const comando = input.value.trim();
+            if (!comando) return;
+            const terminalOutput = document.getElementById('terminal-output');
+            terminalOutput.innerHTML += `\n<span style="color: #06ffa5;">$ ${comando}</span>\n`;
+            input.value = '';
+            try {
+                const response = await fetch('/api/terminal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comando })
+                });
+                const data = await response.json();
+                terminalOutput.innerHTML += (data.output || data.error) + '\n';
+            } catch (error) {
+                terminalOutput.innerHTML += `<span style="color: #ef476f;">Error: ${error.message}</span>\n`;
+            }
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+        function handleTerminalKey(event) {
+            if (event.key === 'Enter') ejecutarComandoTerminal();
+        }
+
+        // Almacenamiento
+        async function verAlmacenamiento() {
+            document.getElementById('almacenamiento-card').style.display = 'block';
+            const content = document.getElementById('almacenamiento-content');
+            content.innerHTML = '<div class="loading"></div> Cargando...';
+            try {
+                const response = await fetch('/api/almacenamiento');
+                const data = await response.json();
+                content.innerHTML = `
+                    <div><h4>📀 Disco Principal</h4>
+                    <div class="metrica"><div class="metrica-label">Uso</div>
+                    <div class="metrica-valor">${data.disco_principal.porcentaje}%</div>
+                    <div class="progress-bar-container"><div class="progress-fill" style="width: ${data.disco_principal.porcentaje}%"></div></div>
+                    <div>Usado: ${(data.disco_principal.usado/1024/1024/1024).toFixed(1)} GB<br>Libre: ${(data.disco_principal.libre/1024/1024/1024).toFixed(1)} GB</div></div></div>
+                    <div><h4>💾 Discos Montados</h4>${data.discos.map(d => `<div class="metrica"><strong>${d.dispositivo}</strong> en ${d.montaje}<div class="progress-bar-container"><div class="progress-fill" style="width: ${d.porcentaje}%"></div></div><div>${(d.usado/1024/1024/1024).toFixed(1)} GB / ${(d.total/1024/1024/1024).toFixed(1)} GB</div></div>`).join('')}</div>
+                `;
+            } catch (error) {
+                content.innerHTML = `<div style="color: #ef476f;">Error: ${error.message}</div>`;
+            }
+        }
+        function cerrarAlmacenamiento() {
+            document.getElementById('almacenamiento-card').style.display = 'none';
+        }
+
+        function mostrarNotificacion(mensaje) {
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = mensaje;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
