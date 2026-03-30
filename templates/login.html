@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Panel Myxsi - Iniciar Sesión</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-container {
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .login-card {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 40px 30px;
+            border: 1px solid rgba(67, 97, 238, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .login-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo i {
+            font-size: 3rem;
+            color: #4361ee;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .logo h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4361ee, #7209b7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-top: 10px;
+        }
+
+        .logo p {
+            color: #64748b;
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #f8fafc;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(67, 97, 238, 0.3);
+            transition: all 0.3s;
+        }
+
+        .input-group:focus-within {
+            border-color: #4361ee;
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+            transform: scale(1.02);
+        }
+
+        .input-group i {
+            padding: 0 15px;
+            color: #64748b;
+        }
+
+        .input-group input, .input-group select {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 14px 15px 14px 0;
+            color: #f8fafc;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .input-group select {
+            cursor: pointer;
+        }
+
+        .input-group select option {
+            background: #0f172a;
+            color: #f8fafc;
+        }
+
+        .input-group input::placeholder {
+            color: #475569;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #4361ee, #7209b7);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            background: rgba(239, 71, 111, 0.2);
+            border-left: 3px solid #ef476f;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #ef476f;
+            font-size: 0.85rem;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .info-message {
+            background: rgba(6, 255, 165, 0.1);
+            border-left: 3px solid #06ffa5;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #06ffa5;
+            font-size: 0.85rem;
+        }
+
+        .success-message {
+            background: rgba(6, 255, 165, 0.2);
+            border-left: 3px solid #06ffa5;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #06ffa5;
+            font-size: 0.85rem;
+        }
+
+        .usuarios-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        .usuario-tag {
+            background: rgba(67, 97, 238, 0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(67, 97, 238, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .usuario-tag:hover {
+            background: rgba(67, 97, 238, 0.4);
+            transform: scale(1.05);
+        }
+
+        .usuario-tag i {
+            font-size: 0.7rem;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #64748b;
+            font-size: 0.75rem;
+        }
+
+        .footer i {
+            margin: 0 2px;
+        }
+
+        .security-badge {
+            display: inline-block;
+            background: rgba(6, 255, 165, 0.1);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 0.7rem;
+            margin-top: 15px;
+            color: #06ffa5;
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 30px 20px;
+            }
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+            .usuarios-list {
+                gap: 6px;
+            }
+            .usuario-tag {
+                font-size: 0.7rem;
+                padding: 4px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo">
+                <i class="fas fa-cube"></i>
+                <h1>Panel Myxsi</h1>
+                <p>Control Total de tu Servidor Debian</p>
+            </div>
+
+            <div class="info-message">
+                <i class="fas fa-shield-alt"></i> 
+                <strong>Autenticación del Sistema</strong><br>
+                Usa las mismas credenciales que usas para iniciar sesión en este equipo
+            </div>
+
+            {% if error %}
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i> {{ error }}
+            </div>
+            {% endif %}
+
+            {% if success %}
+            <div class="success-message">
+                <i class="fas fa-check-circle"></i> {{ success }}
+            </div>
+            {% endif %}
+
+            <form method="POST" id="loginForm">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Usuario del Sistema</label>
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="usuario" id="usuario" 
+                               placeholder="Ej: root, tu_usuario, kali" 
+                               required autofocus autocomplete="username">
+                    </div>
+                    
+                    {% if usuarios %}
+                    <div class="usuarios-list">
+                        <small style="color: #64748b; width: 100%; margin-bottom: 5px;">
+                            <i class="fas fa-users"></i> Usuarios disponibles:
+                        </small>
+                        {% for u in usuarios %}
+                        <span class="usuario-tag" onclick="seleccionarUsuario('{{ u.username }}')">
+                            <i class="fas fa-user"></i> {{ u.username }}
+                            {% if u.uid == 0 %}
+                            <i class="fas fa-crown" style="color: #ffd166; font-size: 0.6rem;"></i>
+                            {% endif %}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Contraseña</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="contraseña" id="contraseña" 
+                               placeholder="Tu contraseña del sistema" 
+                               required autocomplete="current-password">
+                        <i class="fas fa-eye" style="cursor: pointer; padding-right: 15px;" onclick="togglePassword()"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login" id="btnLogin">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <div class="security-badge">
+                    <i class="fas fa-check-circle"></i> Autenticación PAM activa
+                </div>
+            </div>
+
+            <div class="footer">
+                <p><i class="fas fa-database"></i> Autenticación contra usuarios del sistema</p>
+                <p><i class="fas fa-shield-alt"></i> Panel de Administración Myxsi v2.0</p>
+                <p><i class="fas fa-linux"></i> Compatible con Debian, Ubuntu, Kali</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función para seleccionar usuario de la lista
+        function seleccionarUsuario(usuario) {
+            document.getElementById('usuario').value = usuario;
+            document.getElementById('usuario').focus();
+            // Efecto visual
+            const tags = document.querySelectorAll('.usuario-tag');
+            tags.forEach(tag => {
+                tag.style.background = 'rgba(67, 97, 238, 0.2)';
+            });
+            event.target.closest('.usuario-tag').style.background = 'rgba(67, 97, 238, 0.6)';
+        }
+
+        // Función para mostrar/ocultar contraseña
+        function togglePassword() {
+            const passwordInput = document.getElementById('contraseña');
+            const icon = event.target;
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Mejorar experiencia de usuario
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const btn = document.getElementById('btnLogin');
+            const usuario = document.getElementById('usuario').value;
+            const contraseña = document.getElementById('contraseña').value;
+            
+            if (!usuario || !contraseña) {
+                e.preventDefault();
+                mostrarMensaje('Por favor completa todos los campos', 'error');
+                return;
+            }
+            
+            // Mostrar loading
+            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Verificando...';
+            btn.disabled = true;
+        });
+
+        function mostrarMensaje(mensaje, tipo) {
+            const container = document.querySelector('.login-card');
+            const existingMsg = document.querySelector('.error-message, .success-message');
+            if (existingMsg) existingMsg.remove();
+            
+            const div = document.createElement('div');
+            div.className = tipo === 'error' ? 'error-message' : 'success-message';
+            div.innerHTML = `<i class="fas fa-${tipo === 'error' ? 'exclamation-circle' : 'check-circle'}"></i> ${mensaje}`;
+            
+            const form = document.getElementById('loginForm');
+            form.parentNode.insertBefore(div, form);
+            
+            setTimeout(() => {
+                div.style.opacity = '0';
+                setTimeout(() => div.remove(), 300);
+            }, 3000);
+        }
+
+        // Mensaje de bienvenida en consola
+        console.log('%c🔐 Panel Myxsi - Autenticación del Sistema', 'color: #06ffa5; font-size: 14px; font-weight: bold;');
+        console.log('%cUsa tus credenciales del sistema para iniciar sesión', 'color: #4361ee; font-size: 12px;');
+        
+        // Si hay error, mostrar notificación
+        {% if error %}
+        console.log('%c❌ Error de autenticación', 'color: #ef476f;');
+        {% endif %}
+    </script>
+</body>
+</html>

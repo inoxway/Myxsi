@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Panel Myxsi - Immich (Google Photos)</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #4361ee;
+            --secondary: #7209b7;
+            --success: #06ffa5;
+            --danger: #ef476f;
+            --warning: #ffd166;
+            --dark-card: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            color: var(--light);
+            padding: 20px;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            border: 1px solid rgba(6, 255, 165, 0.3);
+            position: relative;
+        }
+
+        .header h1 { font-size: 2rem; }
+        .header h1 i { color: var(--success); margin-right: 10px; }
+
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(15, 23, 42, 0.9);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(6, 255, 165, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-info i { color: var(--success); margin-right: 5px; }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: rgba(67, 97, 238, 0.2);
+            border-radius: 12px;
+            color: var(--primary);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            background: rgba(67, 97, 238, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: var(--dark-card);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid var(--success);
+            padding-left: 15px;
+        }
+
+        .immich-status {
+            background: linear-gradient(135deg, rgba(6, 255, 165, 0.1), rgba(6, 255, 165, 0.05));
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .immich-status i { font-size: 3rem; margin-bottom: 10px; }
+        .immich-status h3 { margin: 10px 0; font-size: 1.3rem; }
+        
+        .btn-install {
+            background: linear-gradient(135deg, var(--success), #00cc7a);
+            color: #0f172a;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .btn-install:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(6, 255, 165, 0.3); }
+        
+        .btn-open {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+            margin-left: 10px;
+        }
+
+        .btn-open:hover { transform: scale(1.05); }
+
+        .immich-iframe {
+            width: 100%;
+            height: 70vh;
+            border: none;
+            border-radius: 16px;
+            background: #0a0c10;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .feature-item i {
+            font-size: 1.5rem;
+            color: var(--success);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .feature-item span {
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(6, 255, 165, 0.3);
+            border-top-color: var(--success);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .toast-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--dark-card);
+            border-left: 4px solid var(--success);
+            padding: 12px 20px;
+            border-radius: 12px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .info-text {
+            background: rgba(67, 97, 238, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: var(--gray);
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.5rem; }
+            .user-info { font-size: 0.7rem; padding: 5px 10px; top: 10px; right: 10px; }
+            .immich-iframe { height: 60vh; }
+            .feature-list { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-images"></i> Immich - Google Photos Alternativo</h1>
+            <p>Gestión de fotos y videos auto-alojado</p>
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i> {{ usuario }}
+                {% if rol == 'admin' %}<span style="color: var(--success);"> 👑 Admin</span>{% endif %}
+            </div>
+            <a href="/" class="btn-back"><i class="fas fa-arrow-left"></i> Volver al Panel</a>
+            <a href="/storage" class="btn-back" style="margin-left: 10px;"><i class="fas fa-folder"></i> Gestor de Archivos</a>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-info-circle"></i> Estado de Immich</div>
+            <div id="status-container">
+                <div style="text-align: center;"><div class="loading"></div> Verificando estado...</div>
+            </div>
+        </div>
+
+        <div id="immich-card" style="display: none;">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-photo-video"></i> Galería Immich</div>
+                <div id="immich-content">
+                    <div style="text-align: center; padding: 40px;">
+                        <div class="loading"></div>
+                        <p>Cargando Immich...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let immichUrl = null;
+        let immichInstalled = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            verificarEstado();
+        });
+
+        async function verificarEstado() {
+            const container = document.getElementById('status-container');
+            
+            try {
+                const response = await fetch('/api/immich/status');
+                const data = await response.json();
+                
+                immichInstalled = data.instalado || data.docker;
+                immichUrl = data.url || 'http://localhost:2283';
+                
+                if (immichInstalled) {
+                    container.innerHTML = `
+                        <div class="immich-status">
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            <h3>✅ Immich está instalado y funcionando</h3>
+                            <p>Tu galería de fotos personal está lista para usar</p>
+                            ${data.docker ? '<p><i class="fas fa-docker"></i> Ejecutándose en contenedores Docker</p>' : ''}
+                            ${data.directorio ? `<p><i class="fas fa-folder"></i> Directorio: ${data.directorio}</p>` : ''}
+                            <div>
+                                <button class="btn-install" onclick="abrirImmich()">
+                                    <i class="fas fa-external-link-alt"></i> Abrir Immich
+                                </button>
+                                <button class="btn-open" onclick="window.open('/storage', '_blank')">
+                                    <i class="fas fa-folder-open"></i> Ir a Archivos
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Mostrar la galería en iframe
+                    document.getElementById('immich-card').style.display = 'block';
+                    cargarImmich();
+                    
+                } else {
+                    container.innerHTML = `
+                        <div class="immich-status">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--warning);"></i>
+                            <h3>📸 Immich no está instalado</h3>
+                            <p><strong>¿Qué es Immich?</strong> Un gestor de fotos auto-alojado, alternativa a Google Photos</p>
+                            <div class="feature-list">
+                                <div class="feature-item"><i class="fas fa-mobile-alt"></i><span>Backup automático desde móvil</span></div>
+                                <div class="feature-item"><i class="fas fa-face-smile"></i><span>Reconocimiento facial</span></div>
+                                <div class="feature-item"><i class="fas fa-map-marker-alt"></i><span>Mapa de ubicaciones</span></div>
+                                <div class="feature-item"><i class="fas fa-users"></i><span>Álbumes compartidos</span></div>
+                                <div class="feature-item"><i class="fas fa-search"></i><span>Búsqueda inteligente</span></div>
+                                <div class="feature-item"><i class="fas fa-film"></i><span>Soporte para videos</span></div>
+                            </div>
+                            <button class="btn-install" onclick="instalarImmich()">
+                                <i class="fas fa-download"></i> Instalar Immich (Docker)
+                            </button>
+                            <div class="info-text">
+                                <i class="fas fa-info-circle"></i> 
+                                La instalación tomará unos minutos. Requiere Docker.<br>
+                                Una vez instalado, podrás acceder desde cualquier dispositivo.
+                            </div>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="immich-status">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
+                        <h3>❌ Error verificando estado</h3>
+                        <p>${error.message}</p>
+                        <button class="btn-install" onclick="location.reload()">
+                            <i class="fas fa-sync-alt"></i> Reintentar
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function cargarImmich() {
+            const content = document.getElementById('immich-content');
+            if (content) {
+                content.innerHTML = `
+                    <div class="immich-status" style="margin-bottom: 20px;">
+                        <i class="fas fa-images"></i>
+                        <p>Accediendo a Immich - Tu galería personal de fotos</p>
+                        <p style="font-size: 0.8rem; margin-top: 10px;">
+                            <i class="fas fa-info-circle"></i> 
+                            Si es la primera vez, crea una cuenta en Immich para comenzar
+                        </p>
+                    </div>
+                    <iframe src="${immichUrl}" class="immich-iframe" title="Immich Gallery" id="immichFrame"></iframe>
+                    <div class="info-text">
+                        <i class="fas fa-mobile-alt"></i> 
+                        <strong>App móvil disponible:</strong> Descarga la app de Immich en 
+                        <a href="https://immich.app/download" target="_blank" style="color: var(--success);">immich.app/download</a><br>
+                        Configura el servidor como: <code style="background: #1a1e2a; padding: 2px 6px; border-radius: 4px;">http://${window.location.hostname}:2283</code>
+                    </div>
+                `;
+            }
+        }
+
+        async function instalarImmich() {
+            if (!confirm('⚠️ ¿Instalar Immich?\n\nEsto descargará y configurará Docker automáticamente.\n\nLa instalación tomará varios minutos.\n\n¿Deseas continuar?')) return;
+            
+            mostrarNotificacion('🔄 Instalando Immich... Esto puede tomar varios minutos. No cierres esta ventana.');
+            
+            const container = document.getElementById('status-container');
+            container.innerHTML = `
+                <div class="immich-status">
+                    <div class="loading"></div>
+                    <h3>📦 Instalando Immich...</h3>
+                    <p>Descargando e instalando contenedores Docker</p>
+                    <p style="font-size: 0.7rem;">Esto puede tomar 3-5 minutos dependiendo de tu conexión</p>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch('/api/immich/install', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarNotificacion('✅ Immich instalado correctamente. Espera unos segundos a que inicie...');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 8000);
+                } else {
+                    mostrarNotificacion(`❌ Error durante la instalación: ${data.output}`);
+                    verificarEstado();
+                }
+            } catch (error) {
+                mostrarNotificacion(`❌ Error: ${error.message}`);
+                verificarEstado();
+            }
+        }
+
+        function abrirImmich() {
+            if (immichUrl) {
+                window.open(immichUrl, '_blank');
+            }
+        }
+
+        function mostrarNotificacion(mensaje) {
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = mensaje;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        // Mensaje de bienvenida en consola
+        console.log('%c📸 Immich - Google Photos Alternativo', 'color: #06ffa5; font-size: 14px; font-weight: bold;');
+        console.log('%c💡 Self-hosted photo and video management solution', 'color: #4361ee;');
+    </script>
+</body>
+</html>

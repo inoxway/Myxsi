@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Panel Myxsi - Terminal REAL</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0c10;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .terminal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-header {
+            background: #1a1e2a;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(67, 97, 238, 0.3);
+            z-index: 10;
+        }
+
+        .terminal-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .terminal-title i {
+            font-size: 1.2rem;
+            color: #06ffa5;
+        }
+
+        .terminal-title span {
+            color: #f8fafc;
+            font-weight: 500;
+        }
+
+        .terminal-title small {
+            color: #64748b;
+            font-size: 0.75rem;
+            margin-left: 10px;
+        }
+
+        .terminal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-terminal {
+            background: rgba(67, 97, 238, 0.2);
+            border: none;
+            color: #f8fafc;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .btn-terminal:hover {
+            background: rgba(67, 97, 238, 0.4);
+        }
+
+        .btn-terminal.danger:hover {
+            background: rgba(239, 71, 111, 0.4);
+            color: #ef476f;
+        }
+
+        .user-info {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #06ffa5;
+        }
+
+        .user-info i {
+            margin-right: 5px;
+        }
+
+        #terminal {
+            flex: 1;
+            padding: 10px;
+            background: #0a0c10;
+        }
+
+        .status-bar {
+            background: #0f172a;
+            padding: 6px 15px;
+            font-size: 0.7rem;
+            color: #64748b;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 10;
+        }
+
+        .status-connected {
+            color: #06ffa5;
+        }
+
+        .status-disconnected {
+            color: #ef476f;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .cursor-blink {
+            animation: blink 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <div class="terminal-title">
+                <i class="fas fa-terminal"></i>
+                <span>Terminal REAL - Debian Linux</span>
+                <small><i class="fas fa-user"></i> {{ usuario }}</small>
+            </div>
+            <div class="terminal-actions">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i> {{ usuario }}
+                    {% if rol == 'admin' %}
+                    <i class="fas fa-crown" style="color: #ffd166;"></i>
+                    {% endif %}
+                </div>
+                <button class="btn-terminal" onclick="clearTerminal()">
+                    <i class="fas fa-eraser"></i> Limpiar
+                </button>
+                <button class="btn-terminal danger" onclick="closeTerminal()">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
+        
+        <div id="terminal"></div>
+        
+        <div class="status-bar">
+            <div>
+                <i class="fas fa-info-circle"></i> Terminal REAL - Usa comandos completos de Linux
+            </div>
+            <div id="connection-status">
+                <i class="fas fa-spinner fa-pulse"></i> Conectando...
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit/lib/xterm-addon-fit.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-web-links/lib/xterm-addon-web-links.js"></script>
+
+    <script>
+        // Configuración del terminal
+        const term = new Terminal({
+            cursorBlink: true,
+            cursorStyle: 'block',
+            fontSize: 14,
+            fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+            theme: {
+                background: '#0a0c10',
+                foreground: '#00ff9d',
+                cursor: '#00ff9d',
+                cursorAccent: '#0a0c10',
+                selection: 'rgba(6, 255, 165, 0.3)',
+                black: '#0a0c10',
+                red: '#ef476f',
+                green: '#06ffa5',
+                yellow: '#ffd166',
+                blue: '#4361ee',
+                magenta: '#7209b7',
+                cyan: '#06ffa5',
+                white: '#f8fafc',
+                brightBlack: '#64748b',
+                brightRed: '#ef476f',
+                brightGreen: '#06ffa5',
+                brightYellow: '#ffd166',
+                brightBlue: '#4361ee',
+                brightMagenta: '#7209b7',
+                brightCyan: '#06ffa5',
+                brightWhite: '#f8fafc'
+            },
+            allowProposedApi: true,
+            scrollback: 10000,
+            tabStopWidth: 4
+        });
+
+        // Add-ons
+        const fitAddon = new FitAddon.FitAddon();
+        const webLinksAddon = new WebLinksAddon.WebLinksAddon();
+        
+        let socket = null;
+        let isConnected = false;
+
+        // Inicializar terminal
+        function initTerminal() {
+            term.loadAddon(fitAddon);
+            term.loadAddon(webLinksAddon);
+            
+            term.open(document.getElementById('terminal'));
+            fitAddon.fit();
+            
+            // Manejar redimensionamiento de ventana
+            window.addEventListener('resize', () => {
+                fitAddon.fit();
+                if (socket && isConnected) {
+                    socket.emit('terminal_resize', {
+                        rows: term.rows,
+                        cols: term.cols
+                    });
+                }
+            });
+            
+            // Manejar entrada del usuario
+            term.onData((data) => {
+                if (socket && isConnected) {
+                    socket.emit('terminal_input', { data: data });
+                }
+            });
+            
+            // Conectar WebSocket
+            connectWebSocket();
+        }
+        
+        // Conectar WebSocket
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const socketUrl = `${protocol}//${window.location.host}`;
+            
+            socket = io(socketUrl, {
+                transports: ['websocket'],
+                reconnection: true,
+                reconnectionAttempts: 10,
+                reconnectionDelay: 1000
+            });
+            
+            socket.on('connect', () => {
+                console.log('✅ WebSocket conectado');
+                updateStatus(true, 'Conectado');
+                term.write('\x1b[32m\r\n✅ Conectado al servidor...\x1b[0m\r\n');
+                socket.emit('terminal_init', {});
+            });
+            
+            socket.on('disconnect', () => {
+                console.log('❌ WebSocket desconectado');
+                updateStatus(false, 'Desconectado');
+                term.write('\x1b[31m\r\n❌ Desconectado del servidor. Reconectando...\x1b[0m\r\n');
+                isConnected = false;
+            });
+            
+            socket.on('terminal_ready', (data) => {
+                console.log('Terminal lista:', data);
+                updateStatus(true, 'Terminal activa');
+                term.write(`\x1b[32m\r\n✅ ${data.message}\x1b[0m\r\n`);
+                term.write(`\x1b[36m📁 Directorio: ~\x1b[0m\r\n`);
+                term.write(`\x1b[33m💡 Escribe comandos de Linux (ls, cd, pwd, etc.)\x1b[0m\r\n`);
+                term.write(`\x1b[32m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1b[0m\r\n`);
+                isConnected = true;
+            });
+            
+            socket.on('terminal_output', (data) => {
+                if (data.data) {
+                    term.write(data.data);
+                }
+            });
+            
+            socket.on('terminal_error', (data) => {
+                term.write(`\x1b[31m\r\n❌ Error: ${data.error}\x1b[0m\r\n`);
+                updateStatus(false, 'Error');
+            });
+            
+            socket.on('connect_error', (error) => {
+                console.error('Error de conexión:', error);
+                updateStatus(false, 'Error de conexión');
+                term.write(`\x1b[31m\r\n❌ Error de conexión: ${error.message}\x1b[0m\r\n`);
+            });
+        }
+        
+        // Actualizar estado de conexión
+        function updateStatus(connected, message) {
+            isConnected = connected;
+            const statusDiv = document.getElementById('connection-status');
+            if (connected) {
+                statusDiv.innerHTML = `<i class="fas fa-link"></i> <span class="status-connected">${message}</span>`;
+            } else {
+                statusDiv.innerHTML = `<i class="fas fa-unlink"></i> <span class="status-disconnected">${message}</span>`;
+            }
+        }
+        
+        // Limpiar terminal
+        function clearTerminal() {
+            term.clear();
+            term.write('\x1b[2J\x1b[H');
+            term.write(`\x1b[32m✨ Terminal limpiado\x1b[0m\r\n`);
+        }
+        
+        // Cerrar terminal y volver al dashboard
+        function closeTerminal() {
+            if (socket && isConnected) {
+                socket.disconnect();
+            }
+            window.location.href = '/';
+        }
+        
+        // Prevenir cierre accidental
+        window.addEventListener('beforeunload', (e) => {
+            if (isConnected) {
+                e.preventDefault();
+                e.returnValue = '¿Estás seguro de que quieres salir? La terminal se cerrará.';
+            }
+        });
+        
+        // Iniciar cuando la página cargue
+        document.addEventListener('DOMContentLoaded', () => {
+            initTerminal();
+        });
+        
+        // Enfocar terminal al hacer clic
+        document.getElementById('terminal').addEventListener('click', () => {
+            term.focus();
+        });
+        
+        console.log('%c🔧 Terminal REAL de Linux', 'color: #06ffa5; font-size: 14px; font-weight: bold;');
+        console.log('%cUsa comandos completos de Linux', 'color: #4361ee;');
+    </script>
+</body>
+</html>
