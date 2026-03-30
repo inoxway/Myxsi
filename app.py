@@ -965,3 +965,6 @@ if __name__ == '__main__':
     
     # Ejecutar la aplicación con SocketIO
     socketio.run(app, host='0.0.0.0', port=5000, debug=False)
+
+
+#este codigo esta hechor Por Liendo
