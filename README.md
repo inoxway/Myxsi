@@ -54,13 +54,12 @@
 | Característica | Estado | Descripción |
 |----------------|--------|-------------|
 | 🔐 **Autenticación PAM** | ✅ Completo | Usa las credenciales del sistema Linux |
-| 💻 **Terminal REAL** | ✅ Completo | Terminal Linux completa con xterm.js + WebSocket |
+| 💻 **Terminal REAL** | 🚧 En desarrollo | Terminal Linux completa con xterm.js + WebSocket |
 | 📁 **Gestor de Archivos** | ✅ Completo | Navega, sube y organiza tus archivos |
-| 📸 **Immich Integration** | ✅ Completo | Google Photos alternativo auto-alojado |
-| 🎤 **Asistente de Voz** | 🚧 En desarrollo | Control por voz del panel |
-| 📊 **Monitoreo en Tiempo Real** | ✅ Completo | CPU, RAM, Disco, Procesos, Servicios |
-| 🐳 **Docker Ready** | ✅ Completo | Soporte para contenedores |
-| 📱 **Responsive Design** | ✅ Completo | Funciona perfecto en móviles |
+| 📸 **Immich Integration** | 🚧 En desarrollo | Google Photos alternativo auto-alojado |
+| 🎤 **Asistente de Voz Myxsi** | 🚧 En desarrollo | Control por voz del panel |
+| 📊 **Panel de control Myxsi** | 🚧 En desarrollo | CPU, RAM, Disco, Procesos, Servicios y configuracion |
+| 📱 **Responsive Design** | ✅ Completo | Funciona perfecto la conexion de móviles |
 
 </div>
 
@@ -70,7 +69,7 @@
 
 **Myxsi Panel** es un sistema de administración para servidores Debian que te permite:
 
-- 🖥️ **Controlar tu servidor desde cualquier lugar** a través de una interfaz web moderna
+- 🖥️ **Controlar tu servidor desde cualquier lugar de tu red local** a través de una interfaz web moderna
 - 💻 **Acceder a una terminal REAL de Linux** desde tu navegador (bash/zsh completa)
 - 📸 **Gestionar tus fotos** con Immich, la alternativa open-source a Google Photos
 - 📁 **Navegar por el sistema de archivos** y subir/descargar archivos
