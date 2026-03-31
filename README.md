@@ -14,7 +14,7 @@
   <br>
   
   <h1>🚀 Myxsi Panel</h1>
-  <h3>Panel de Administración para Debian con Terminal REAL y Asistente de Voz</h3>
+  <h3>Myxsi panel desarrollado para Debian con Terminal REAL y Asistente de Voz y Ciberseguridad</h3>
   
   <p>
     <strong>Control total de tu servidor desde cualquier dispositivo móvil o navegador</strong>
@@ -106,8 +106,8 @@
 
 ## 🚀 Instalación Rápida
 
-### Requisitos
-- Debian 12+ / Ubuntu 22.04+ / Kali Linux / Raspberry Pi OS
+### Sistema permitido
+- Debian 12+ / Kali Linux / Orange pi Zero 3
 - Python 3.9+
 - Conexión a internet
 - Usuario con permisos sudo
