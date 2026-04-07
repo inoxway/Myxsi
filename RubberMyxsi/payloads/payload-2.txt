@@ -1,0 +1,9 @@
+WAIT 1000
+GUI
+WAIT 500
+TYPE cmd
+ENTER
+ENTER
+WAIT 3000
+TYPE ping google.com
+ENTER
