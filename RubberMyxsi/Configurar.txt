@@ -19,3 +19,6 @@ Y crear la carpeta payloads y crear archivo:
 y pegar en el pendrive pegar los archivos "boot.py" y "code.py"
 
 Y estarias listo
+
+
+ESP32_N16R8
