@@ -6,6 +6,7 @@ Características:
 - Autenticación PAM (usuarios del sistema)
 - Terminal REAL con WebSocket y xterm.js
 - Gestor de archivos completo
+- Gestor de scripts con editor en línea
 - Integración con Immich (Google Photos alternativo)
 - Monitoreo de sistema (CPU, RAM, disco, procesos, servicios)
 """
@@ -51,6 +52,10 @@ terminal_processes = {}
 cache_sistema = {}
 ultima_actualizacion = 0
 CACHE_TTL = 2
+
+# Directorio de scripts
+SCRIPTS_DIR = os.path.join(os.path.dirname(__file__), 'scripts')
+os.makedirs(SCRIPTS_DIR, exist_ok=True)
 
 # ==================== AUTENTICACIÓN PAM (USUARIOS DEL SISTEMA) ====================
 
@@ -567,20 +572,7 @@ def immich_page():
 @login_requerido
 def scripts_page():
     """Página de scripts"""
-    scripts_dir = os.path.join(os.path.dirname(__file__), 'scripts')
-    scripts = []
-    
-    if os.path.exists(scripts_dir):
-        for file in os.listdir(scripts_dir):
-            if file.endswith(('.sh', '.py')) and not file.startswith('.'):
-                ruta = os.path.join(scripts_dir, file)
-                scripts.append({
-                    'nombre': file,
-                    'tipo': 'bash' if file.endswith('.sh') else 'python',
-                    'tamaño': os.path.getsize(ruta)
-                })
-    
-    return render_template('scripts.html', usuario=session['usuario'], rol=session['rol'], scripts=scripts)
+    return render_template('scripts.html', usuario=session['usuario'], rol=session['rol'])
 
 # ==================== API ENDPOINTS ====================
 
@@ -641,56 +633,6 @@ def api_terminal():
             return jsonify({'success': False, 'output': f'⚠️ Comando bloqueado: {peligroso}', 'code': -1})
     
     return jsonify(ejecutar_comando(comando, timeout=15))
-
-@app.route('/api/ejecutar_script', methods=['POST'])
-@login_requerido
-def api_ejecutar_script():
-    """Ejecuta un script del directorio scripts"""
-    data = request.get_json()
-    script_nombre = data.get('script', '')
-    
-    if '..' in script_nombre or script_nombre.startswith('/'):
-        return jsonify({'success': False, 'output': '❌ Nombre inválido', 'code': -1})
-    
-    scripts_dir = os.path.join(os.path.dirname(__file__), 'scripts')
-    script_path = os.path.join(scripts_dir, script_nombre)
-    
-    if os.path.exists(script_path) and script_nombre.endswith(('.sh', '.py')):
-        comando = f'bash {script_path}' if script_nombre.endswith('.sh') else f'python3 {script_path}'
-        return jsonify(ejecutar_comando(comando, timeout=60))
-    
-    return jsonify({'success': False, 'output': f'❌ Script no encontrado: {script_nombre}', 'code': -1})
-
-@app.route('/api/crear_script', methods=['POST'])
-@login_requerido
-def api_crear_script():
-    """Crea un nuevo script"""
-    data = request.get_json()
-    nombre = data.get('nombre', '').strip()
-    contenido = data.get('contenido', '')
-    
-    if not nombre:
-        return jsonify({'success': False, 'output': '❌ Nombre requerido', 'code': -1})
-    
-    if not nombre.endswith('.sh'):
-        nombre += '.sh'
-    
-    if '..' in nombre or '/' in nombre:
-        return jsonify({'success': False, 'output': '❌ Nombre inválido', 'code': -1})
-    
-    scripts_dir = os.path.join(os.path.dirname(__file__), 'scripts')
-    os.makedirs(scripts_dir, exist_ok=True)
-    script_path = os.path.join(scripts_dir, nombre)
-    
-    try:
-        with open(script_path, 'w') as f:
-            if not contenido.startswith('#!/bin'):
-                contenido = '#!/bin/bash\n' + contenido
-            f.write(contenido)
-        os.chmod(script_path, 0o755)
-        return jsonify({'success': True, 'output': f'✅ Script {nombre} creado', 'code': 0})
-    except Exception as e:
-        return jsonify({'success': False, 'output': f'❌ Error: {str(e)}', 'code': -1})
 
 @app.route('/api/servicios')
 @login_requerido
@@ -824,6 +766,179 @@ def api_storage_create_folder():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
+# ==================== API GESTOR DE SCRIPTS MEJORADO ====================
+
+@app.route('/api/scripts/list')
+@login_requerido
+def api_scripts_list():
+    """Lista todos los scripts disponibles"""
+    scripts = []
+    try:
+        for file in os.listdir(SCRIPTS_DIR):
+            if file.endswith(('.sh', '.py')) and not file.startswith('.'):
+                ruta = os.path.join(SCRIPTS_DIR, file)
+                tipo = 'bash' if file.endswith('.sh') else 'python'
+                
+                # Leer primera línea para descripción
+                descripcion = ''
+                try:
+                    with open(ruta, 'r') as f:
+                        primeras_lineas = f.readlines()[:5]
+                        for linea in primeras_lineas:
+                            if linea.startswith('#') and not linea.startswith('#!'):
+                                descripcion = linea.strip('#').strip()
+                                break
+                except:
+                    pass
+                
+                scripts.append({
+                    'nombre': file,
+                    'tipo': tipo,
+                    'tamaño': os.path.getsize(ruta),
+                    'modificado': datetime.fromtimestamp(os.path.getmtime(ruta)).strftime('%Y-%m-%d %H:%M:%S'),
+                    'descripcion': descripcion or ('Script Bash' if tipo == 'bash' else 'Script Python')
+                })
+        
+        scripts.sort(key=lambda x: x['nombre'])
+        return jsonify({'success': True, 'scripts': scripts})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/scripts/get/<path:nombre>')
+@login_requerido
+def api_scripts_get(nombre):
+    """Obtiene el contenido de un script"""
+    if '..' in nombre or nombre.startswith('/'):
+        return jsonify({'success': False, 'error': 'Nombre inválido'})
+    
+    script_path = os.path.join(SCRIPTS_DIR, nombre)
+    
+    if not os.path.exists(script_path):
+        return jsonify({'success': False, 'error': 'Script no encontrado'})
+    
+    try:
+        with open(script_path, 'r') as f:
+            contenido = f.read()
+        
+        tipo = 'bash' if nombre.endswith('.sh') else 'python'
+        
+        return jsonify({
+            'success': True,
+            'script': {
+                'nombre': nombre,
+                'tipo': tipo,
+                'contenido': contenido,
+                'tamaño': os.path.getsize(script_path)
+            }
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/scripts/save', methods=['POST'])
+@login_requerido
+def api_scripts_save():
+    """Guarda o crea un script"""
+    data = request.get_json()
+    nombre = data.get('nombre', '').strip()
+    contenido = data.get('contenido', '')
+    tipo = data.get('tipo', 'bash')
+    
+    if not nombre:
+        return jsonify({'success': False, 'error': 'Nombre requerido'})
+    
+    # Validar nombre
+    if '..' in nombre or '/' in nombre or nombre.startswith('.'):
+        return jsonify({'success': False, 'error': 'Nombre inválido'})
+    
+    # Asegurar extensión correcta
+    if tipo == 'bash' and not nombre.endswith('.sh'):
+        nombre += '.sh'
+    elif tipo == 'python' and not nombre.endswith('.py'):
+        nombre += '.py'
+    
+    script_path = os.path.join(SCRIPTS_DIR, nombre)
+    
+    try:
+        with open(script_path, 'w') as f:
+            f.write(contenido)
+        os.chmod(script_path, 0o755)
+        return jsonify({'success': True, 'message': f'Script {nombre} guardado correctamente'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/scripts/delete', methods=['POST'])
+@login_requerido
+def api_scripts_delete():
+    """Elimina un script"""
+    data = request.get_json()
+    nombre = data.get('nombre', '').strip()
+    
+    if not nombre:
+        return jsonify({'success': False, 'error': 'Nombre requerido'})
+    
+    if '..' in nombre or '/' in nombre:
+        return jsonify({'success': False, 'error': 'Nombre inválido'})
+    
+    script_path = os.path.join(SCRIPTS_DIR, nombre)
+    
+    if not os.path.exists(script_path):
+        return jsonify({'success': False, 'error': 'Script no encontrado'})
+    
+    try:
+        os.remove(script_path)
+        return jsonify({'success': True, 'message': f'Script {nombre} eliminado'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/scripts/execute', methods=['POST'])
+@login_requerido
+def api_scripts_execute():
+    """Ejecuta un script y retorna la salida"""
+    data = request.get_json()
+    nombre = data.get('nombre', '').strip()
+    
+    if not nombre:
+        return jsonify({'success': False, 'error': 'Nombre requerido'})
+    
+    if '..' in nombre or '/' in nombre:
+        return jsonify({'success': False, 'error': 'Nombre inválido'})
+    
+    script_path = os.path.join(SCRIPTS_DIR, nombre)
+    
+    if not os.path.exists(script_path):
+        return jsonify({'success': False, 'error': 'Script no encontrado'})
+    
+    # Ejecutar según tipo
+    if nombre.endswith('.sh'):
+        comando = f'bash {script_path}'
+    elif nombre.endswith('.py'):
+        comando = f'python3 {script_path}'
+    else:
+        return jsonify({'success': False, 'error': 'Tipo de script no soportado'})
+    
+    return jsonify(ejecutar_comando(comando, timeout=120))
+
+@app.route('/api/scripts/kill', methods=['POST'])
+@login_requerido
+def api_scripts_kill():
+    """Mata un proceso en ejecución (por PID)"""
+    data = request.get_json()
+    pid = data.get('pid')
+    
+    if not pid:
+        return jsonify({'success': False, 'error': 'PID requerido'})
+    
+    try:
+        pid = int(pid)
+        os.kill(pid, signal.SIGTERM)
+        return jsonify({'success': True, 'message': f'Proceso {pid} terminado'})
+    except ProcessLookupError:
+        return jsonify({'success': False, 'error': f'Proceso {pid} no encontrado'})
+    except PermissionError:
+        return jsonify({'success': False, 'error': 'Permiso denegado'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
 # ==================== API IMMICH ====================
 
 @app.route('/api/immich/status')
@@ -923,8 +1038,7 @@ def handle_terminal_resize(data):
 
 if __name__ == '__main__':
     # Crear directorio de scripts
-    scripts_dir = os.path.join(os.path.dirname(__file__), 'scripts')
-    os.makedirs(scripts_dir, exist_ok=True)
+    os.makedirs(SCRIPTS_DIR, exist_ok=True)
     
     # Scripts de ejemplo
     scripts_ejemplo = [
@@ -934,7 +1048,7 @@ if __name__ == '__main__':
     ]
     
     for nombre, contenido in scripts_ejemplo:
-        script_path = os.path.join(scripts_dir, nombre)
+        script_path = os.path.join(SCRIPTS_DIR, nombre)
         if not os.path.exists(script_path):
             with open(script_path, 'w') as f:
                 f.write(contenido)
@@ -956,6 +1070,7 @@ if __name__ == '__main__':
     print("🔐 Autenticación: Usuarios del sistema (PAM)")
     print("💻 Terminal REAL con xterm.js + WebSocket")
     print("📁 Gestor de archivos completo")
+    print("📝 Gestor de scripts con editor en línea")
     print("📸 Integración con Immich (Google Photos alternativo)")
     print("="*70)
     print(f"📱 Accede desde cualquier dispositivo en: http://{ip}:5000")
@@ -966,5 +1081,4 @@ if __name__ == '__main__':
     # Ejecutar la aplicación con SocketIO
     socketio.run(app, host='0.0.0.0', port=5000, debug=False)
 
-
-#este codigo esta hechor Por Liendo
+# Este código está hecho por Liendo
