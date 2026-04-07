@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Panel Myxsi - Scripts</title>
+    <title>Panel Myxsi - Gestor de Scripts</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -27,7 +27,7 @@
             padding: 20px;
         }
 
-        .container { max-width: 1200px; margin: 0 auto; }
+        .container { max-width: 1400px; margin: 0 auto; }
 
         .header {
             text-align: center;
@@ -77,11 +77,24 @@
             transform: translateY(-2px);
         }
 
+        /* Layout principal */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .card {
             background: var(--dark-card);
             border-radius: 24px;
             padding: 20px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             border: 1px solid rgba(255, 255, 255, 0.05);
             transition: transform 0.3s ease;
         }
@@ -101,50 +114,191 @@
             padding-left: 15px;
         }
 
-        .scripts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+        .scripts-list {
+            max-height: 400px;
+            overflow-y: auto;
         }
 
-        .script-card {
+        .script-item {
             background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            padding: 15px;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
             cursor: pointer;
             transition: all 0.3s;
             border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .script-card:hover {
-            transform: translateY(-3px);
+        .script-item:hover {
             border-color: var(--primary);
             background: rgba(67, 97, 238, 0.1);
         }
 
-        .script-card i {
-            font-size: 2rem;
-            color: var(--primary);
-            margin-bottom: 10px;
+        .script-item.selected {
+            border-color: var(--primary);
+            background: rgba(67, 97, 238, 0.2);
         }
 
-        .script-card h3 {
-            font-size: 1rem;
-            margin-bottom: 8px;
+        .script-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .script-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(67, 97, 238, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .script-details h4 {
+            font-size: 0.95rem;
+            margin-bottom: 4px;
             font-family: monospace;
-            word-break: break-all;
         }
 
-        .script-card p {
-            font-size: 0.75rem;
-            color: var(--gray);
-        }
-
-        .script-card .script-size {
+        .script-details p {
             font-size: 0.7rem;
             color: var(--gray);
-            margin-top: 8px;
+        }
+
+        .script-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-icon:hover {
+            background: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .btn-icon.danger:hover {
+            background: var(--danger);
+        }
+
+        .btn-icon.success:hover {
+            background: var(--success);
+            color: #000;
+        }
+
+        .editor-area {
+            margin-top: 15px;
+        }
+
+        .editor-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .editor-header input {
+            flex: 2;
+            padding: 10px;
+            background: #1a1e2a;
+            border: 1px solid rgba(67, 97, 238, 0.3);
+            border-radius: 12px;
+            color: white;
+            font-family: monospace;
+        }
+
+        .editor-header select {
+            padding: 10px;
+            background: #1a1e2a;
+            border: 1px solid rgba(67, 97, 238, 0.3);
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .code-editor {
+            width: 100%;
+            min-height: 300px;
+            background: #0a0c10;
+            border: 1px solid rgba(67, 97, 238, 0.3);
+            border-radius: 12px;
+            color: #00ff9d;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            padding: 15px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .code-editor:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .editor-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: #000;
+        }
+
+        .btn-success:hover {
+            transform: scale(1.02);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: scale(1.02);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: #000;
         }
 
         .terminal {
@@ -160,6 +314,12 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            justify-content: space-between;
+        }
+
+        .terminal-controls {
+            display: flex;
+            gap: 8px;
         }
 
         .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
@@ -169,7 +329,7 @@
 
         .terminal-body {
             padding: 15px;
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
             font-size: 0.85rem;
             max-height: 400px;
             overflow-y: auto;
@@ -178,49 +338,23 @@
             white-space: pre-wrap;
         }
 
-        .btn-ejecutar {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
-            color: white;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-
-        .btn-ejecutar:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
-        }
-
-        .terminal-input {
-            width: 100%;
-            padding: 12px;
+        .terminal-input-line {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
             background: #1a1e2a;
-            border: 1px solid rgba(67, 97, 238, 0.3);
-            border-radius: 12px;
-            color: white;
-            font-family: monospace;
-            resize: vertical;
+            border-top: 1px solid rgba(67, 97, 238, 0.3);
         }
 
-        .terminal-input:focus {
+        .terminal-input-line input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #00ff9d;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
             outline: none;
-            border-color: var(--primary);
         }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(67, 97, 238, 0.3);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
 
         .toast-notification {
             position: fixed;
@@ -240,6 +374,23 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            margin-left: 8px;
+        }
+
+        .status-running {
+            background: var(--success);
+            color: #000;
+        }
+
+        .status-stopped {
+            background: var(--gray);
+        }
+
         .empty-state {
             text-align: center;
             padding: 40px;
@@ -252,12 +403,17 @@
             opacity: 0.5;
         }
 
-        @media (max-width: 768px) {
-            body { padding: 12px; }
-            .header h1 { font-size: 1.5rem; }
-            .user-info { font-size: 0.7rem; padding: 5px 10px; }
-            .scripts-grid { grid-template-columns: 1fr; }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(67, 97, 238, 0.3);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -273,105 +429,142 @@
 
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-code"></i> Panel Myxsi - Scripts</h1>
+            <h1><i class="fas fa-code"></i> Gestor de Scripts</h1>
             <a href="/" class="btn-back"><i class="fas fa-arrow-left"></i> Volver al Panel</a>
         </div>
 
-        <div class="card">
-            <div class="card-title"><i class="fas fa-list"></i> Scripts Disponibles</div>
-            <div class="scripts-grid" id="scripts-grid">
-                <div class="empty-state">
-                    <div class="loading"></div>
-                    <p>Cargando scripts...</p>
+        <div class="main-layout">
+            <!-- Panel izquierdo: Lista de scripts -->
+            <div>
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-list"></i> Scripts Disponibles
+                        <button class="btn-icon" onclick="cargarScripts()" style="margin-left: auto;" title="Recargar">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="scripts-list" id="scripts-list">
+                        <div class="empty-state">
+                            <div class="loading"></div>
+                            <p>Cargando scripts...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-plus-circle"></i> Crear Nuevo Script
+                    </div>
+                    <div class="editor-header">
+                        <input type="text" id="new-script-name" placeholder="nombre_del_script.sh">
+                        <select id="new-script-type">
+                            <option value="bash">Bash (.sh)</option>
+                            <option value="python">Python (.py)</option>
+                        </select>
+                    </div>
+                    <textarea id="new-script-content" class="code-editor" rows="6" 
+                              placeholder='#!/bin/bash
+echo "Hola Mundo"
+echo "Fecha: $(date)"'></textarea>
+                    <div class="editor-buttons">
+                        <button class="btn btn-primary" onclick="crearScript()">
+                            <i class="fas fa-save"></i> Guardar Script
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="card" id="ejecucion-card" style="display: none;">
-            <div class="card-title"><i class="fas fa-terminal"></i> Ejecución del Script</div>
-            <div class="terminal">
-                <div class="terminal-header">
-                    <div class="terminal-dot red"></div>
-                    <div class="terminal-dot yellow"></div>
-                    <div class="terminal-dot green"></div>
-                    <span>Salida del script</span>
+            <!-- Panel derecho: Editor y Terminal -->
+            <div>
+                <div class="card" id="editor-card" style="display: none;">
+                    <div class="card-title">
+                        <i class="fas fa-edit"></i> Editor de Script
+                        <span id="editor-status" style="margin-left: auto;"></span>
+                    </div>
+                    <div class="editor-header">
+                        <input type="text" id="edit-script-name" placeholder="Nombre del script">
+                        <select id="edit-script-type">
+                            <option value="bash">Bash (.sh)</option>
+                            <option value="python">Python (.py)</option>
+                        </select>
+                    </div>
+                    <textarea id="edit-script-content" class="code-editor" rows="12"></textarea>
+                    <div class="editor-buttons">
+                        <button class="btn btn-primary" onclick="guardarScript()">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                        <button class="btn btn-success" onclick="ejecutarScriptActual()">
+                            <i class="fas fa-play"></i> Ejecutar
+                        </button>
+                        <button class="btn btn-danger" onclick="eliminarScriptActual()">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                        <button class="btn btn-warning" onclick="cancelarEdicion()">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
                 </div>
-                <div class="terminal-body" id="script-output"></div>
-            </div>
-        </div>
 
-        <div class="card">
-            <div class="card-title"><i class="fas fa-plus-circle"></i> Crear Nuevo Script</div>
-            <div style="margin-bottom: 15px;">
-                <input type="text" id="script-nombre" class="terminal-input" 
-                       style="margin-bottom: 10px;" 
-                       placeholder="Nombre del script (ej: mi-script.sh)">
-                <textarea id="script-contenido" rows="8" class="terminal-input" 
-                          placeholder="Contenido del script...&#10;#!/bin/bash&#10;echo 'Hola Mundo'&#10;echo 'Fecha: $(date)'"></textarea>
-                <button class="btn-ejecutar" onclick="crearScript()" style="margin-top: 10px;">
-                    <i class="fas fa-save"></i> Guardar Script
-                </button>
+                <div class="card" id="terminal-card">
+                    <div class="card-title">
+                        <i class="fas fa-terminal"></i> Terminal de Ejecución
+                        <div style="margin-left: auto;">
+                            <button class="btn-icon" onclick="limpiarTerminal()" title="Limpiar terminal">
+                                <i class="fas fa-eraser"></i>
+                            </button>
+                            <button class="btn-icon" onclick="matarProceso()" title="Detener ejecución" id="kill-process-btn" style="display: none;">
+                                <i class="fas fa-stop"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="terminal">
+                        <div class="terminal-header">
+                            <div class="terminal-controls">
+                                <div class="terminal-dot red"></div>
+                                <div class="terminal-dot yellow"></div>
+                                <div class="terminal-dot green"></div>
+                            </div>
+                            <span id="terminal-title">Terminal</span>
+                        </div>
+                        <div class="terminal-body" id="terminal-output">
+                            <span style="color: var(--gray);">💻 Terminal lista. Selecciona un script y haz clic en Ejecutar.</span>
+                        </div>
+                        <div class="terminal-input-line">
+                            <span>$&nbsp;</span>
+                            <input type="text" id="terminal-command" placeholder="Escribe un comando y presiona Enter..." 
+                                   onkeypress="if(event.key==='Enter') ejecutarComandoTerminal()">
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        let scriptsData = [];
+        let scriptsList = [];
+        let currentScript = null;
+        let currentProcessPid = null;
+        let isExecuting = false;
 
         document.addEventListener('DOMContentLoaded', () => {
             cargarScripts();
+            document.getElementById('terminal-command').focus();
         });
 
         async function cargarScripts() {
             try {
-                const response = await fetch('/scripts');
-                const html = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const scriptsElements = doc.querySelectorAll('.script-card');
+                const response = await fetch('/api/scripts/list');
+                const data = await response.json();
                 
-                if (scriptsElements.length === 0) {
-                    document.getElementById('scripts-grid').innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-folder-open"></i>
-                            <p>No hay scripts disponibles</p>
-                            <p style="font-size: 0.8rem;">Crea uno nuevo arriba</p>
-                        </div>
-                    `;
-                    return;
+                if (data.success) {
+                    scriptsList = data.scripts;
+                    renderScriptsList();
+                } else {
+                    throw new Error(data.error);
                 }
-                
-                // Obtener scripts reales del servidor
-                const scriptsResponse = await fetch('/api/servicios');
-                // Usar endpoint para obtener scripts
-                const scriptFiles = await obtenerScriptsReales();
-                
-                const grid = document.getElementById('scripts-grid');
-                if (scriptFiles.length === 0) {
-                    grid.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-code-branch"></i>
-                            <p>No hay scripts en el directorio scripts/</p>
-                            <p style="font-size: 0.8rem;">Crea uno nuevo arriba o añade archivos .sh o .py</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                grid.innerHTML = scriptFiles.map(s => `
-                    <div class="script-card" onclick="ejecutarScript('${s.nombre}')">
-                        <i class="fas fa-${s.tipo === 'bash' ? 'terminal' : 'python'}"></i>
-                        <h3>${s.nombre}</h3>
-                        <p>${s.descripcion || 'Script personalizado'}</p>
-                        <div class="script-size">
-                            <i class="fas fa-database"></i> ${formatBytes(s.tamaño)}
-                        </div>
-                    </div>
-                `).join('');
-                
             } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('scripts-grid').innerHTML = `
+                console.error('Error cargando scripts:', error);
+                document.getElementById('scripts-list').innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-exclamation-triangle"></i>
                         <p>Error cargando scripts</p>
@@ -381,86 +574,313 @@
             }
         }
 
-        async function obtenerScriptsReales() {
-            try {
-                const response = await fetch('/api/estado');
-                // Hacer una petición para listar scripts
-                const scriptsList = await fetch('/scripts-list').catch(() => null);
-                if (scriptsList) {
-                    return await scriptsList.json();
-                }
-            } catch (e) {
-                console.log('Usando scripts de ejemplo');
-            }
+        function renderScriptsList() {
+            const container = document.getElementById('scripts-list');
             
-            // Scripts de ejemplo por defecto
-            return [
-                { nombre: 'ejemplo.sh', tipo: 'bash', descripcion: 'Muestra información del sistema', tamaño: 150 },
-                { nombre: 'info_sistema.sh', tipo: 'bash', descripcion: 'Información detallada del sistema', tamaño: 250 },
-                { nombre: 'monitoreo_red.sh', tipo: 'bash', descripcion: 'Monitorea conexiones de red', tamaño: 200 },
-                { nombre: 'backup_rapido.sh', tipo: 'bash', descripcion: 'Crea un backup rápido', tamaño: 180 }
-            ];
+            if (scriptsList.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-code-branch"></i>
+                        <p>No hay scripts disponibles</p>
+                        <p style="font-size: 0.8rem;">Crea uno nuevo en el panel derecho</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = scriptsList.map(script => `
+                <div class="script-item" data-script="${script.nombre}" onclick="seleccionarScript('${script.nombre}')">
+                    <div class="script-info">
+                        <div class="script-icon">
+                            <i class="fas fa-${script.tipo === 'bash' ? 'terminal' : 'python'}"></i>
+                        </div>
+                        <div class="script-details">
+                            <h4>${escapeHtml(script.nombre)}</h4>
+                            <p>${script.tipo === 'bash' ? 'Bash Script' : 'Python Script'} • ${formatBytes(script.tamaño)}</p>
+                        </div>
+                    </div>
+                    <div class="script-actions">
+                        <button class="btn-icon" onclick="event.stopPropagation(); ejecutarScript('${script.nombre}')" title="Ejecutar">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button class="btn-icon" onclick="event.stopPropagation(); editarScript('${script.nombre}')" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-icon danger" onclick="event.stopPropagation(); eliminarScript('${script.nombre}')" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        async function ejecutarScript(scriptNombre) {
-            const outputDiv = document.getElementById('ejecucion-card');
-            const outputText = document.getElementById('script-output');
-            outputDiv.style.display = 'block';
-            outputText.innerHTML = '<div class="loading"></div> Ejecutando script...<br>';
+        async function seleccionarScript(nombre) {
+            const script = scriptsList.find(s => s.nombre === nombre);
+            if (script) {
+                editarScript(nombre);
+            }
+        }
+
+        async function editarScript(nombre) {
+            try {
+                const response = await fetch(`/api/scripts/get/${encodeURIComponent(nombre)}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentScript = data.script;
+                    document.getElementById('edit-script-name').value = data.script.nombre;
+                    document.getElementById('edit-script-type').value = data.script.tipo;
+                    document.getElementById('edit-script-content').value = data.script.contenido;
+                    document.getElementById('editor-card').style.display = 'block';
+                    document.getElementById('editor-status').innerHTML = '<span class="status-badge status-stopped">Editando</span>';
+                    
+                    // Scroll al editor
+                    document.getElementById('editor-card').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    mostrarNotificacion('❌ Error: ' + data.error);
+                }
+            } catch (error) {
+                mostrarNotificacion('❌ Error cargando script: ' + error.message);
+            }
+        }
+
+        async function guardarScript() {
+            const nombre = document.getElementById('edit-script-name').value.trim();
+            const tipo = document.getElementById('edit-script-type').value;
+            let contenido = document.getElementById('edit-script-content').value;
+            
+            if (!nombre) {
+                mostrarNotificacion('❌ Ingresa un nombre para el script');
+                return;
+            }
+            
+            // Asegurar extensión correcta
+            let nombreFinal = nombre;
+            if (tipo === 'bash' && !nombreFinal.endsWith('.sh')) {
+                nombreFinal += '.sh';
+            } else if (tipo === 'python' && !nombreFinal.endsWith('.py')) {
+                nombreFinal += '.py';
+            }
+            
+            // Agregar shebang si no existe
+            if (tipo === 'bash' && !contenido.trim().startsWith('#!')) {
+                contenido = '#!/bin/bash\n\n' + contenido;
+            } else if (tipo === 'python' && !contenido.trim().startsWith('#!')) {
+                contenido = '#!/usr/bin/env python3\n\n' + contenido;
+            }
             
             try {
-                const response = await fetch('/api/ejecutar_script', {
+                const response = await fetch('/api/scripts/save', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ script: scriptNombre })
+                    body: JSON.stringify({ nombre: nombreFinal, contenido, tipo })
                 });
                 const data = await response.json();
                 
                 if (data.success) {
-                    outputText.innerHTML = `<span style="color: #06ffa5;">✅ Script ejecutado correctamente</span>\n\n${escapeHtml(data.output || 'Sin salida')}`;
+                    mostrarNotificacion('✅ ' + data.message);
+                    cargarScripts();
+                    cancelarEdicion();
                 } else {
-                    outputText.innerHTML = `<span style="color: #ef476f;">❌ Error: ${escapeHtml(data.output)}</span>`;
+                    mostrarNotificacion('❌ Error: ' + data.error);
                 }
-                
-                outputText.scrollTop = outputText.scrollHeight;
             } catch (error) {
-                outputText.innerHTML = `<span style="color: #ef476f;">❌ Error: ${error.message}</span>`;
+                mostrarNotificacion('❌ Error: ' + error.message);
             }
         }
 
         async function crearScript() {
-            const nombre = document.getElementById('script-nombre').value.trim();
-            const contenido = document.getElementById('script-contenido').value;
+            const nombre = document.getElementById('new-script-name').value.trim();
+            const tipo = document.getElementById('new-script-type').value;
+            let contenido = document.getElementById('new-script-content').value;
             
             if (!nombre) {
-                mostrarNotificacion('❌ Por favor ingresa un nombre para el script');
+                mostrarNotificacion('❌ Ingresa un nombre para el script');
                 return;
             }
             
-            if (!contenido) {
-                mostrarNotificacion('❌ Por favor ingresa el contenido del script');
-                return;
+            let nombreFinal = nombre;
+            if (tipo === 'bash' && !nombreFinal.endsWith('.sh')) {
+                nombreFinal += '.sh';
+            } else if (tipo === 'python' && !nombreFinal.endsWith('.py')) {
+                nombreFinal += '.py';
+            }
+            
+            if (tipo === 'bash' && !contenido.trim().startsWith('#!')) {
+                contenido = '#!/bin/bash\n\n' + contenido;
+            } else if (tipo === 'python' && !contenido.trim().startsWith('#!')) {
+                contenido = '#!/usr/bin/env python3\n\n' + contenido;
             }
             
             try {
-                const response = await fetch('/api/crear_script', {
+                const response = await fetch('/api/scripts/save', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombre, contenido })
+                    body: JSON.stringify({ nombre: nombreFinal, contenido, tipo })
                 });
                 const data = await response.json();
                 
                 if (data.success) {
-                    mostrarNotificacion(`✅ ${data.output}`);
-                    document.getElementById('script-nombre').value = '';
-                    document.getElementById('script-contenido').value = '';
+                    mostrarNotificacion('✅ ' + data.message);
+                    document.getElementById('new-script-name').value = '';
+                    document.getElementById('new-script-content').value = '';
                     cargarScripts();
                 } else {
-                    mostrarNotificacion(`❌ Error: ${data.output}`);
+                    mostrarNotificacion('❌ Error: ' + data.error);
                 }
             } catch (error) {
-                mostrarNotificacion(`❌ Error: ${error.message}`);
+                mostrarNotificacion('❌ Error: ' + error.message);
             }
+        }
+
+        async function eliminarScript(nombre) {
+            if (!confirm(`¿Eliminar el script "${nombre}" permanentemente?`)) return;
+            
+            try {
+                const response = await fetch('/api/scripts/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarNotificacion('✅ ' + data.message);
+                    if (currentScript && currentScript.nombre === nombre) {
+                        cancelarEdicion();
+                    }
+                    cargarScripts();
+                } else {
+                    mostrarNotificacion('❌ Error: ' + data.error);
+                }
+            } catch (error) {
+                mostrarNotificacion('❌ Error: ' + error.message);
+            }
+        }
+
+        function eliminarScriptActual() {
+            if (currentScript) {
+                eliminarScript(currentScript.nombre);
+            }
+        }
+
+        async function ejecutarScript(nombre) {
+            const outputDiv = document.getElementById('terminal-output');
+            const terminalTitle = document.getElementById('terminal-title');
+            
+            agregarALog(`\n${'='.repeat(50)}`);
+            agregarALog(`🚀 Ejecutando script: ${nombre}`);
+            agregarALog(`${'='.repeat(50)}\n`);
+            
+            terminalTitle.innerHTML = `<i class="fas fa-play"></i> Ejecutando: ${nombre}`;
+            
+            isExecuting = true;
+            document.getElementById('kill-process-btn').style.display = 'inline-block';
+            
+            try {
+                const response = await fetch('/api/scripts/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    agregarALog(data.output || '✅ Script ejecutado correctamente');
+                } else {
+                    agregarALog(`❌ Error: ${data.error || data.output}`);
+                }
+            } catch (error) {
+                agregarALog(`❌ Error de conexión: ${error.message}`);
+            } finally {
+                isExecuting = false;
+                document.getElementById('kill-process-btn').style.display = 'none';
+                terminalTitle.innerHTML = `<i class="fas fa-terminal"></i> Terminal`;
+                agregarALog(`\n${'='.repeat(50)}`);
+                agregarALog(`✅ Ejecución finalizada`);
+                agregarALog(`${'='.repeat(50)}\n`);
+            }
+        }
+
+        function ejecutarScriptActual() {
+            if (currentScript) {
+                ejecutarScript(currentScript.nombre);
+            }
+        }
+
+        async function ejecutarComandoTerminal() {
+            const input = document.getElementById('terminal-command');
+            const comando = input.value.trim();
+            
+            if (!comando) return;
+            
+            agregarALog(`\n$ ${comando}`);
+            input.value = '';
+            
+            try {
+                const response = await fetch('/api/terminal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comando })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    agregarALog(data.output);
+                } else {
+                    agregarALog(`❌ ${data.output}`);
+                }
+            } catch (error) {
+                agregarALog(`❌ Error: ${error.message}`);
+            }
+        }
+
+        async function matarProceso() {
+            if (currentProcessPid) {
+                try {
+                    const response = await fetch('/api/scripts/kill', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ pid: currentProcessPid })
+                    });
+                    const data = await response.json();
+                    agregarALog(`\n🛑 ${data.message || 'Proceso detenido'}`);
+                    currentProcessPid = null;
+                    isExecuting = false;
+                    document.getElementById('kill-process-btn').style.display = 'none';
+                } catch (error) {
+                    agregarALog(`❌ Error deteniendo proceso: ${error.message}`);
+                }
+            } else {
+                agregarALog(`\n⚠️ No hay proceso en ejecución`);
+            }
+        }
+
+        function agregarALog(texto) {
+            const outputDiv = document.getElementById('terminal-output');
+            const contenidoActual = outputDiv.innerHTML;
+            
+            // Limitar el tamaño del log
+            let nuevoContenido = contenidoActual + escapeHtml(texto) + '\n';
+            const lines = nuevoContenido.split('\n');
+            if (lines.length > 500) {
+                nuevoContenido = lines.slice(-400).join('\n');
+            }
+            
+            outputDiv.innerHTML = nuevoContenido;
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+
+        function limpiarTerminal() {
+            document.getElementById('terminal-output').innerHTML = '<span style="color: var(--gray);">💻 Terminal limpiada.</span>\n';
+        }
+
+        function cancelarEdicion() {
+            currentScript = null;
+            document.getElementById('editor-card').style.display = 'none';
+            document.getElementById('edit-script-name').value = '';
+            document.getElementById('edit-script-type').value = 'bash';
+            document.getElementById('edit-script-content').value = '';
         }
 
         function formatBytes(bytes) {
@@ -484,6 +904,11 @@
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
         }
+
+        // Auto-refresh cada 5 segundos
+        setInterval(() => {
+            cargarScripts();
+        }, 5000);
     </script>
 </body>
 </html>
