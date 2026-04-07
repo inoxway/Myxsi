@@ -1,0 +1,21 @@
+Meterse en la pagina "https://adafruit.github.io/Adafruit_WebSerial_ESPTool/" y configurar con "BUILD 460800" y seleccionar el usb y darle "erase" y configurar en el primer archivo
+
+nombre del archivo: tinyuf2-yd_esp32_s3_n16r8-0.35.0-combined.bin
+
+Y programarlo
+
+va a crear un usb y hay que pegar el siguiente archivo en el usb: adafruit-circuitpython-yd_esp32_s3_n16r8-en_US-10.2.0-alpha.1.uf2
+
+y agregar en la carpeta lib las carpetas:
+
+-adafruit_ble
+-adafruit_hid
+
+Y crear la carpeta payloads y crear archivo:
+
+-payload-1.txt
+-patload-2.txt
+
+y pegar en el pendrive pegar los archivos "boot.py" y "code.py"
+
+Y estarias listo
