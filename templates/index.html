@@ -183,6 +183,12 @@
             align-items: center;
             padding: 12px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .servicio-item:hover {
+            background: rgba(67, 97, 238, 0.1);
         }
 
         .servicio-nombre { font-family: monospace; font-size: 0.85rem; }
@@ -233,7 +239,132 @@
             color: white;
             border: none;
         }
-
+        
+        /* Estilos para WiFi */
+        .wifi-network-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .wifi-network-item:hover {
+            background: rgba(67, 97, 238, 0.2);
+        }
+        
+        .wifi-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: var(--dark-card);
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 400px;
+            width: 90%;
+            border: 1px solid var(--primary);
+        }
+        
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--primary);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .modal-content input:focus {
+            outline: none;
+            border-color: var(--success);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn-group button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-primary:hover, .btn-danger:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+        
+        .signal-strength {
+            display: inline-flex;
+            gap: 2px;
+            align-items: flex-end;
+            margin-left: 10px;
+        }
+        
+        .signal-bar {
+            width: 3px;
+            background: var(--primary);
+            border-radius: 1px;
+            transition: height 0.2s;
+        }
+        
+        .wifi-status-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .wifi-icon {
+            font-size: 2rem;
+        }
+        
+        .wifi-details {
+            flex: 1;
+        }
+        
+        .scan-btn {
+            width: 100%;
+            margin-top: 15px;
+        }
+        
         @media (max-width: 768px) {
             body { padding: 12px; }
             .header h1 { font-size: 1.8rem; }
@@ -244,6 +375,7 @@
             .metricas-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
             .metrica-valor { font-size: 1.4rem; }
             .procesos-table { font-size: 0.7rem; }
+            .wifi-status-container { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
@@ -275,7 +407,7 @@
                 <span>Immich</span>
                 <small style="font-size: 0.6rem; display: block; color: #06ffa5;">Google Photos</small>
             </div>
-            <div class="btn-accion" onclick="window.location.href='/storage'">
+            <div class="btn-accion" onclick="verAlmacenamiento()">
                 <i class="fas fa-hdd"></i>
                 <span>Almacenamiento</span>
                 <small style="font-size: 0.6rem; display: block;">gestor de archivos</small>
@@ -295,6 +427,35 @@
             <div class="btn-accion danger" onclick="ejecutarAccion('apagar')">
                 <i class="fas fa-times-circle"></i>
                 <span>Apagar</span>
+            </div>
+        </div>
+
+        <!-- Sección WiFi -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-wifi"></i>
+                <span>Control WiFi</span>
+                <span id="wifi-status-badge" style="margin-left: auto;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </span>
+            </div>
+            <div id="wifi-status">
+                <div class="loading"></div> Cargando estado...
+            </div>
+            
+            <!-- Botón para escanear redes -->
+            <button onclick="escanearRedesWifi()" class="btn-accion scan-btn" id="scan-btn">
+                <i class="fas fa-search"></i> Escanear Redes WiFi
+            </button>
+            
+            <!-- Lista de redes -->
+            <div id="wifi-networks" style="display: none; margin-top: 20px;">
+                <div class="card-title" style="margin-top: 10px;">
+                    <i class="fas fa-list"></i>
+                    <span>Redes Disponibles</span>
+                    <span style="margin-left: auto; font-size: 0.7rem;" id="redes-count"></span>
+                </div>
+                <div id="networks-list"></div>
             </div>
         </div>
 
@@ -382,19 +543,37 @@
         </div>
     </div>
 
+    <!-- Modal para contraseña WiFi -->
+    <div id="wifi-password-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 15px;"><i class="fas fa-lock"></i> Contraseña WiFi</h3>
+            <p id="modal-ssid" style="margin-bottom: 15px; color: var(--primary); font-weight: bold;"></p>
+            <input type="password" id="wifi-password" placeholder="Ingresa la contraseña" autocomplete="off">
+            <div class="btn-group">
+                <button onclick="conectarRedWifi()" class="btn-primary">Conectar</button>
+                <button onclick="cerrarModalWifi()" class="btn-danger">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let refreshInterval = null;
+        let redesEscaneadas = [];
+        let redSeleccionada = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             actualizarEstado();
             actualizarProcesos();
             cargarServicios();
+            actualizarEstadoWifi();
             refreshInterval = setInterval(() => {
                 actualizarEstado();
                 actualizarProcesos();
             }, 3000);
         });
 
+        // ==================== FUNCIONES DEL SISTEMA ====================
+        
         async function actualizarEstado() {
             try {
                 const response = await fetch('/api/estado');
@@ -539,6 +718,9 @@
                 const data = await response.json();
                 if (data.success) {
                     mostrarNotificacion(`✅ ${accion} ejecutado correctamente`);
+                    if (accion === 'reiniciar' || accion === 'apagar') {
+                        setTimeout(() => { window.location.href = '/login'; }, 5000);
+                    }
                 } else {
                     mostrarNotificacion(`❌ Error: ${data.output}`);
                 }
@@ -547,43 +729,194 @@
             }
         }
 
-        // Almacenamiento
-        async function verAlmacenamiento() {
-            document.getElementById('almacenamiento-card').style.display = 'block';
-            const content = document.getElementById('almacenamiento-content');
-            content.innerHTML = '<div class="loading"></div> Cargando...';
+        // ==================== FUNCIONES WIFI ====================
+        
+        async function actualizarEstadoWifi() {
             try {
-                const response = await fetch('/api/almacenamiento');
-                const data = await response.json();
-                content.innerHTML = `
-                    <div style="margin-bottom: 20px;">
-                        <h4>📀 Disco Principal</h4>
-                        <div class="metrica">
-                            <div class="metrica-label">Uso</div>
-                            <div class="metrica-valor">${data.disco_principal.porcentaje || 0}%</div>
-                            <div class="progress-bar-container"><div class="progress-fill" style="width: ${data.disco_principal.porcentaje || 0}%"></div></div>
-                            <div style="margin-top: 10px;">
-                                Usado: ${((data.disco_principal.usado || 0) / 1024 / 1024 / 1024).toFixed(1)} GB<br>
-                                Libre: ${((data.disco_principal.libre || 0) / 1024 / 1024 / 1024).toFixed(1)} GB<br>
-                                Total: ${((data.disco_principal.total || 0) / 1024 / 1024 / 1024).toFixed(1)} GB
+                const response = await fetch('/api/wifi/estado');
+                const estado = await response.json();
+                
+                const statusDiv = document.getElementById('wifi-status');
+                const badge = document.getElementById('wifi-status-badge');
+                const scanBtn = document.getElementById('scan-btn');
+                const networksDiv = document.getElementById('wifi-networks');
+                
+                if (estado.conectado) {
+                    badge.innerHTML = '<span class="estado-badge estado-active"><i class="fas fa-check"></i> Conectado</span>';
+                    
+                    let redTexto = '';
+                    if (estado.red_actual && estado.red_actual !== 'Red desconocida' && estado.red_actual !== null) {
+                        redTexto = `<strong>Conectado a:</strong> ${estado.red_actual}<br>`;
+                    } else {
+                        redTexto = `<strong>Estado:</strong> Conectado a internet<br>`;
+                        redTexto += `<small><i class="fas fa-info-circle"></i> Conexión activa</small><br>`;
+                    }
+                    
+                    statusDiv.innerHTML = `
+                        <div class="wifi-status-container">
+                            <div class="wifi-icon"><i class="fas fa-wifi" style="color: #06ffa5; font-size: 2rem;"></i></div>
+                            <div class="wifi-details">
+                                ${redTexto}
+                                <small><i class="fas fa-check-circle"></i> Con internet</small>
+                            </div>
+                            ${estado.ap_activo ? '<div><span class="estado-badge estado-active"><i class="fas fa-broadcast-tower"></i> AP Activo</span></div>' : ''}
+                        </div>
+                    `;
+                    if (networksDiv) networksDiv.style.display = 'none';
+                    if (scanBtn) scanBtn.style.display = 'none';
+                } else {
+                    badge.innerHTML = '<span class="estado-badge estado-inactive"><i class="fas fa-exclamation-triangle"></i> Sin conexión</span>';
+                    statusDiv.innerHTML = `
+                        <div class="wifi-status-container">
+                            <div class="wifi-icon"><i class="fas fa-wifi-slash" style="color: #ef476f; font-size: 2rem;"></i></div>
+                            <div class="wifi-details">
+                                <strong>Sin conexión a internet</strong><br>
+                                <small>Escanea y conéctate a una red WiFi</small>
+                            </div>
+                            ${estado.ap_activo ? '<div><span class="estado-badge estado-active"><i class="fas fa-broadcast-tower"></i> AP: Myxsi</span></div>' : ''}
+                        </div>
+                    `;
+                    if (networksDiv) networksDiv.style.display = 'block';
+                    if (scanBtn) scanBtn.style.display = 'block';
+                }
+                
+            } catch (error) {
+                console.error('Error actualizando estado WiFi:', error);
+                document.getElementById('wifi-status').innerHTML = '<div style="color: var(--danger);">❌ Error cargando estado WiFi</div>';
+            }
+        }
+
+        async function escanearRedesWifi() {
+            const networksDiv = document.getElementById('networks-list');
+            networksDiv.innerHTML = '<div class="loading"></div> Escaneando redes...';
+            
+            try {
+                const response = await fetch('/api/wifi/escanear');
+                const redes = await response.json();
+                redesEscaneadas = redes;
+                
+                const redesCount = document.getElementById('redes-count');
+                if (redesCount) redesCount.textContent = `${redes.length} redes`;
+                
+                if (redes.length === 0) {
+                    networksDiv.innerHTML = '<div style="text-align: center; color: var(--gray); padding: 20px;">❌ No se encontraron redes WiFi</div>';
+                    return;
+                }
+                
+                networksDiv.innerHTML = redes.map(red => `
+                    <div class="wifi-network-item" onclick='mostrarModalWifi(${JSON.stringify(red.ssid)})'>
+                        <div class="wifi-info">
+                            <i class="fas fa-${red.encrypted ? 'lock' : 'unlock-alt'}" style="color: ${red.encrypted ? '#ffd166' : '#06ffa5'}; font-size: 1.2rem;"></i>
+                            <div style="flex: 1;">
+                                <strong>${red.ssid}</strong>
+                                <div style="font-size: 0.7rem; color: var(--gray); margin-top: 4px;">
+                                    Señal: ${red.signal || 0}% 
+                                    <div class="progress-bar-container" style="width: 100px; display: inline-block; margin-left: 5px;">
+                                        <div class="progress-fill" style="width: ${red.signal || 0}%; background: var(--primary);"></div>
+                                    </div>
+                                    ${red.encrypted ? '<span style="margin-left: 10px;"><i class="fas fa-lock"></i> Segura</span>' : '<span style="margin-left: 10px;"><i class="fas fa-unlock-alt"></i> Abierta</span>'}
+                                </div>
                             </div>
                         </div>
+                        <i class="fas fa-chevron-right" style="color: var(--primary);"></i>
                     </div>
-                    <div>
-                        <h4>💾 Discos Montados</h4>
-                        ${(data.discos || []).map(d => `
-                            <div class="metrica" style="margin-top: 10px;">
-                                <strong>${d.dispositivo}</strong> en ${d.montaje} (${d.tipo})
-                                <div class="progress-bar-container" style="margin: 8px 0;">
-                                    <div class="progress-fill" style="width: ${d.porcentaje}%"></div>
-                                </div>
-                                <div>${(d.usado / 1024 / 1024 / 1024).toFixed(1)} GB / ${(d.total / 1024 / 1024 / 1024).toFixed(1)} GB (${d.porcentaje}%)</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
+                `).join('');
+                
+                mostrarNotificacion(`✅ Encontradas ${redes.length} redes WiFi`);
+                
             } catch (error) {
-                content.innerHTML = `<div style="color: #ef476f;">❌ Error: ${error.message}</div>`;
+                networksDiv.innerHTML = `<div style="color: #ef476f; text-align: center; padding: 20px;">❌ Error: ${error.message}</div>`;
+                mostrarNotificacion(`❌ Error escaneando redes: ${error.message}`);
+            }
+        }
+
+        function mostrarModalWifi(ssid) {
+            redSeleccionada = ssid;
+            document.getElementById('modal-ssid').textContent = `Red: ${ssid}`;
+            document.getElementById('wifi-password-modal').style.display = 'flex';
+            document.getElementById('wifi-password').value = '';
+            document.getElementById('wifi-password').focus();
+        }
+
+        function cerrarModalWifi() {
+            document.getElementById('wifi-password-modal').style.display = 'none';
+            redSeleccionada = null;
+        }
+
+        async function conectarRedWifi() {
+            const password = document.getElementById('wifi-password').value;
+            
+            if (!redSeleccionada) return;
+            
+            cerrarModalWifi();
+            mostrarNotificacion(`🔄 Conectando a ${redSeleccionada}...`);
+            
+            try {
+                const response = await fetch('/api/wifi/conectar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ssid: redSeleccionada, password: password })
+                });
+                
+                const resultado = await response.json();
+                
+                if (resultado.success) {
+                    mostrarNotificacion(resultado.message);
+                    setTimeout(() => {
+                        actualizarEstadoWifi();
+                        location.reload();
+                    }, 2000);
+                } else {
+                    mostrarNotificacion(resultado.message);
+                }
+            } catch (error) {
+                mostrarNotificacion(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // ==================== ALMACENAMIENTO ====================
+        
+        async function verAlmacenamiento() {
+            const card = document.getElementById('almacenamiento-card');
+            if (card.style.display === 'none') {
+                card.style.display = 'block';
+                const content = document.getElementById('almacenamiento-content');
+                content.innerHTML = '<div class="loading"></div> Cargando...';
+                try {
+                    const response = await fetch('/api/almacenamiento');
+                    const data = await response.json();
+                    content.innerHTML = `
+                        <div style="margin-bottom: 20px;">
+                            <h4>📀 Disco Principal</h4>
+                            <div class="metrica">
+                                <div class="metrica-label">Uso</div>
+                                <div class="metrica-valor">${data.disco_principal.porcentaje || 0}%</div>
+                                <div class="progress-bar-container"><div class="progress-fill" style="width: ${data.disco_principal.porcentaje || 0}%"></div></div>
+                                <div style="margin-top: 10px;">
+                                    Usado: ${((data.disco_principal.usado || 0) / 1024 / 1024 / 1024).toFixed(1)} GB<br>
+                                    Libre: ${((data.disco_principal.libre || 0) / 1024 / 1024 / 1024).toFixed(1)} GB<br>
+                                    Total: ${((data.disco_principal.total || 0) / 1024 / 1024 / 1024).toFixed(1)} GB
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4>💾 Discos Montados</h4>
+                            ${(data.discos || []).map(d => `
+                                <div class="metrica" style="margin-top: 10px;">
+                                    <strong>${d.dispositivo}</strong> en ${d.montaje} (${d.tipo})
+                                    <div class="progress-bar-container" style="margin: 8px 0;">
+                                        <div class="progress-fill" style="width: ${d.porcentaje}%"></div>
+                                    </div>
+                                    <div>${(d.usado / 1024 / 1024 / 1024).toFixed(1)} GB / ${(d.total / 1024 / 1024 / 1024).toFixed(1)} GB (${d.porcentaje}%)</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } catch (error) {
+                    content.innerHTML = `<div style="color: #ef476f;">❌ Error: ${error.message}</div>`;
+                }
+            } else {
+                card.style.display = 'none';
             }
         }
         
@@ -599,9 +932,21 @@
             setTimeout(() => toast.remove(), 3000);
         }
         
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('wifi-password-modal');
+            if (event.target === modal) {
+                cerrarModalWifi();
+            }
+        }
+        
+        // Actualizar estado WiFi cada 5 segundos
+        setInterval(actualizarEstadoWifi, 5000);
+        
         // Mensaje de bienvenida en consola
         console.log('%c🔧 Panel Myxsi - Dashboard', 'color: #06ffa5; font-size: 14px; font-weight: bold;');
+        console.log('%c📡 WiFi: Punto de acceso automático | Conéctate a redes disponibles', 'color: #4361ee;');
         console.log('%c📸 Immich - Google Photos alternativo | 💻 Terminal REAL | 📁 Gestor de archivos', 'color: #4361ee;');
     </script>
 </body>
-</html>
+</html> 
