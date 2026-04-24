@@ -1,8 +1,9 @@
 #!/bin/bash
 # ============================================
-# PANEL MYXSI - INSTALADOR DIRECTO PARA DEBIAN
-# Instala TODAS las dependencias directamente en el sistema
-# SOLUCIONADO: Conflictos de versiones (Flask + Werkzeug)
+# PANEL MYXSI - INSTALACIÓN COMPLETA PARA DEBIAN
+# Incluye: Selección de zona horaria
+#          Configuración de ruta de app.py
+#          Inicio automático con el sistema
 # ============================================
 
 set -e
@@ -18,8 +19,8 @@ NC='\033[0m'
 
 echo -e "${CYAN}"
 echo "╔════════════════════════════════════════════════════════════════════════════╗"
-echo "║         PANEL MYXSI - INSTALACIÓN DIRECTA PARA DEBIAN                      ║"
-echo "║      Instalando TODAS las dependencias - VERSIONES COMPATIBLES            ║"
+echo "║         PANEL MYXSI - INSTALACIÓN COMPLETA PARA DEBIAN                     ║"
+echo "║      Dependencias + Panel + Immich + WiFi AP + Inicio Automático          ║"
 echo "╚════════════════════════════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 
@@ -47,6 +48,200 @@ print_step() {
     echo -e "${MAGENTA}════════════════════════════════════════════════════════════════${NC}\n"
 }
 
+# ==================== SELECCIÓN DE ZONA HORARIA ====================
+print_step "SELECCIONA TU ZONA HORARIA"
+
+echo -e "${CYAN}Selecciona tu continente/región:${NC}"
+echo "1) America"
+echo "2) Europe"
+echo "3) Asia"
+echo "4) Africa"
+echo "5) Australia"
+echo "6) Pacific"
+echo "7) UTC (Universal)"
+echo ""
+read -p "➡️  Opción (1-7): " continente
+
+case $continente in
+    1)
+        echo -e "\n${CYAN}Selecciona tu ciudad en América:${NC}"
+        echo "1) New_York"
+        echo "2) Los_Angeles"
+        echo "3) Chicago"
+        echo "4) Mexico_City"
+        echo "5) Bogota"
+        echo "6) Lima"
+        echo "7) Santiago"
+        echo "8) Buenos_Aires"
+        echo "9) Sao_Paulo"
+        echo "10) Toronto"
+        echo "11) Vancouver"
+        echo "12) Denver"
+        echo "13) Phoenix"
+        echo "14) Guatemala"
+        echo "15) Panama"
+        echo "16) Caracas"
+        echo "17) La_Paz"
+        echo "18) Montevideo"
+        echo "19) Asuncion"
+        echo "20) Managua"
+        echo "21) San_Salvador"
+        echo "22) Tegucigalpa"
+        echo "23) San_Jose"
+        echo "24) Havana"
+        echo "25) Winnipeg"
+        echo ""
+        read -p "➡️  Opción (1-25): " ciudad
+        case $ciudad in
+            1) ZONA="America/New_York";;
+            2) ZONA="America/Los_Angeles";;
+            3) ZONA="America/Chicago";;
+            4) ZONA="America/Mexico_City";;
+            5) ZONA="America/Bogota";;
+            6) ZONA="America/Lima";;
+            7) ZONA="America/Santiago";;
+            8) ZONA="America/Buenos_Aires";;
+            9) ZONA="America/Sao_Paulo";;
+            10) ZONA="America/Toronto";;
+            11) ZONA="America/Vancouver";;
+            12) ZONA="America/Denver";;
+            13) ZONA="America/Phoenix";;
+            14) ZONA="America/Guatemala";;
+            15) ZONA="America/Panama";;
+            16) ZONA="America/Caracas";;
+            17) ZONA="America/La_Paz";;
+            18) ZONA="America/Montevideo";;
+            19) ZONA="America/Asuncion";;
+            20) ZONA="America/Managua";;
+            21) ZONA="America/El_Salvador";;
+            22) ZONA="America/Tegucigalpa";;
+            23) ZONA="America/Costa_Rica";;
+            24) ZONA="America/Havana";;
+            25) ZONA="America/Winnipeg";;
+            *) ZONA="America/Mexico_City";;
+        esac
+        ;;
+    2)
+        echo -e "\n${CYAN}Selecciona tu ciudad en Europa:${NC}"
+        echo "1) Madrid"
+        echo "2) London"
+        echo "3) Paris"
+        echo "4) Berlin"
+        echo "5) Rome"
+        echo "6) Amsterdam"
+        echo "7) Brussels"
+        echo "8) Vienna"
+        echo "9) Zurich"
+        echo "10) Stockholm"
+        echo "11) Oslo"
+        echo "12) Copenhagen"
+        echo "13) Helsinki"
+        echo "14) Lisbon"
+        echo "15) Dublin"
+        echo "16) Warsaw"
+        echo "17) Prague"
+        echo "18) Budapest"
+        echo "19) Athens"
+        echo "20) Istanbul"
+        echo ""
+        read -p "➡️  Opción (1-20): " ciudad
+        case $ciudad in
+            1) ZONA="Europe/Madrid";;
+            2) ZONA="Europe/London";;
+            3) ZONA="Europe/Paris";;
+            4) ZONA="Europe/Berlin";;
+            5) ZONA="Europe/Rome";;
+            6) ZONA="Europe/Amsterdam";;
+            7) ZONA="Europe/Brussels";;
+            8) ZONA="Europe/Vienna";;
+            9) ZONA="Europe/Zurich";;
+            10) ZONA="Europe/Stockholm";;
+            11) ZONA="Europe/Oslo";;
+            12) ZONA="Europe/Copenhagen";;
+            13) ZONA="Europe/Helsinki";;
+            14) ZONA="Europe/Lisbon";;
+            15) ZONA="Europe/Dublin";;
+            16) ZONA="Europe/Warsaw";;
+            17) ZONA="Europe/Prague";;
+            18) ZONA="Europe/Budapest";;
+            19) ZONA="Europe/Athens";;
+            20) ZONA="Europe/Istanbul";;
+            *) ZONA="Europe/Madrid";;
+        esac
+        ;;
+    3)
+        echo -e "\n${CYAN}Selecciona tu ciudad en Asia:${NC}"
+        echo "1) Tokyo"
+        echo "2) Shanghai"
+        echo "3) Hong_Kong"
+        echo "4) Singapore"
+        echo "5) Seoul"
+        echo "6) Mumbai"
+        echo "7) Delhi"
+        echo "8) Bangkok"
+        echo "9) Jakarta"
+        echo "10) Manila"
+        echo ""
+        read -p "➡️  Opción (1-10): " ciudad
+        case $ciudad in
+            1) ZONA="Asia/Tokyo";;
+            2) ZONA="Asia/Shanghai";;
+            3) ZONA="Asia/Hong_Kong";;
+            4) ZONA="Asia/Singapore";;
+            5) ZONA="Asia/Seoul";;
+            6) ZONA="Asia/Kolkata";;
+            7) ZONA="Asia/Delhi";;
+            8) ZONA="Asia/Bangkok";;
+            9) ZONA="Asia/Jakarta";;
+            10) ZONA="Asia/Manila";;
+            *) ZONA="Asia/Tokyo";;
+        esac
+        ;;
+    4) ZONA="Africa/Cairo";;
+    5) ZONA="Australia/Sydney";;
+    6) ZONA="Pacific/Auckland";;
+    7) ZONA="UTC";;
+    *) ZONA="America/Mexico_City";;
+esac
+
+# Configurar zona horaria del sistema
+print_info "Configurando zona horaria: $ZONA"
+sudo timedatectl set-timezone $ZONA 2>/dev/null || sudo ln -sf /usr/share/zoneinfo/$ZONA /etc/localtime
+print_success "Zona horaria configurada: $(date)"
+
+# ==================== SOLICITAR RUTA DEL ARCHIVO app.py ====================
+print_step "CONFIGURANDO LA RUTA DE TU PANEL (app.py)"
+
+echo -e "${YELLOW}📁 Por favor, ingresa la ruta COMPLETA donde se encuentra tu archivo app.py${NC}"
+echo -e "${CYAN}Ejemplo: /home/myxsi/Myxsi/app.py${NC}"
+echo -e "${CYAN}Ejemplo: /home/usuario/panel/app.py${NC}"
+echo ""
+read -p "➡️  Ruta del archivo app.py: " RUTA_APP
+
+# Validar que el archivo existe
+if [ ! -f "$RUTA_APP" ]; then
+    print_error "El archivo no existe en: $RUTA_APP"
+    echo ""
+    echo -e "${YELLOW}¿Quieres intentar de nuevo? (s/n)${NC}"
+    read -p "➡️ " reintentar
+    if [[ "$reintentar" == "s" || "$reintentar" == "S" ]]; then
+        echo ""
+        read -p "➡️  Ruta del archivo app.py: " RUTA_APP
+        if [ ! -f "$RUTA_APP" ]; then
+            print_error "Archivo no encontrado. Saliendo..."
+            exit 1
+        fi
+    else
+        print_error "Saliendo..."
+        exit 1
+    fi
+fi
+
+# Obtener el directorio del archivo
+DIR_APP=$(dirname "$RUTA_APP")
+print_success "Archivo encontrado: $RUTA_APP"
+print_info "Directorio del panel: $DIR_APP"
+
 # ==================== VERIFICAR SISTEMA ====================
 print_step "VERIFICANDO SISTEMA OPERATIVO"
 
@@ -60,7 +255,7 @@ print_success "Sistema detectado: Debian $DEBIAN_VERSION"
 
 if [ "$EUID" -eq 0 ]; then 
     print_error "No ejecutes este script como root"
-    echo "Ejecuta: ./install_deps.sh"
+    echo "Ejecuta: ./install.sh"
     exit 1
 fi
 
@@ -78,7 +273,7 @@ sudo apt update
 sudo apt upgrade -y
 print_success "Sistema actualizado"
 
-# ==================== INSTALAR DEPENDENCIAS BASE DEL SISTEMA ====================
+# ==================== INSTALAR DEPENDENCIAS BASE (APT) ====================
 print_step "INSTALANDO DEPENDENCIAS BASE (APT)"
 
 sudo apt install -y \
@@ -106,11 +301,12 @@ sudo apt install -y \
     zlib1g-dev \
     psmisc \
     bc \
-    netcat-openbsd
+    netcat-openbsd \
+    systemd
 
 print_success "Dependencias base instaladas via APT"
 
-# ==================== INSTALAR DEPENDENCIAS PARA WIFI ====================
+# ==================== INSTALAR DEPENDENCIAS WIFI ====================
 print_step "INSTALANDO DEPENDENCIAS WIFI"
 
 sudo apt install -y \
@@ -136,7 +332,7 @@ else
     print_success "Node.js ya instalado: $(node --version)"
 fi
 
-# ==================== INSTALAR DOCKER (PARA IMMICH) ====================
+# ==================== INSTALAR DOCKER ====================
 print_step "INSTALANDO DOCKER"
 
 if command -v docker &> /dev/null; then
@@ -169,77 +365,106 @@ if docker compose version &> /dev/null; then
     print_success "Docker Compose plugin disponible"
 fi
 
-# ==================== INSTALAR PAQUETES PYTHON (VERSIONES COMPATIBLES) ====================
-print_step "INSTALANDO PAQUETES PYTHON (VERSIONES COMPATIBLES)"
+# ==================== INSTALAR PAQUETES PYTHON ====================
+print_step "INSTALANDO PAQUETES PYTHON"
 
 # Actualizar pip
 print_info "Actualizando pip..."
 python3 -m pip install --upgrade pip setuptools wheel --break-system-packages
 
-# Instalar Flask y Werkzeug (SIN forzar versiones conflictivas)
-print_info "Instalando Flask y dependencias web (versiones compatibles)..."
+# Instalar dependencias
+print_info "Instalando dependencias Python..."
 python3 -m pip install --break-system-packages \
     Flask \
     flask-socketio \
     python-socketio \
-    eventlet
-
-# Instalar utilidades del sistema
-print_info "Instalando utilidades del sistema..."
-python3 -m pip install --break-system-packages \
+    eventlet \
     psutil \
     netifaces \
     requests \
-    python-dotenv
-
-# Instalar python-pam
-print_info "Instalando python-pam..."
-python3 -m pip install --break-system-packages python-pam
-
-# Instalar servidor de producción
-print_info "Instalando Gunicorn y Gevent..."
-python3 -m pip install --break-system-packages \
+    python-dotenv \
+    python-pam \
     gunicorn \
     gevent \
     gevent-websocket
 
-print_success "Todos los paquetes Python instalados con versiones compatibles"
+print_success "Paquetes Python instalados"
 
-# ==================== VERIFICAR INSTALACIÓN ====================
-print_step "VERIFICANDO INSTALACIÓN"
+# ==================== INSTALAR IMMICH ====================
+print_step "INSTALANDO IMMICH"
 
-ERRORES=0
+print_info "📦 Instalando archivos de Immich..."
 
-echo -e "${BLUE}Verificando paquetes instalados...${NC}\n"
+mkdir -p ~/immich-app
+cd ~/immich-app || exit
 
-# Función para verificar paquetes Python
-verificar_paquete() {
-    python3 -c "import $1" 2>/dev/null
-    if [ $? -eq 0 ]; then
-        echo -e "   ${GREEN}✅ $1${NC}"
-        return 0
-    else
-        echo -e "   ${RED}❌ $1${NC}"
-        return 1
-    fi
-}
+wget -q --show-progress -O docker-compose.yml \
+https://github.com/immich-app/immich/releases/latest/download/docker-compose.yml
 
-verificar_paquete flask
-verificar_paquete flask_socketio
-verificar_paquete eventlet
-verificar_paquete psutil
-verificar_paquete pam
-verificar_paquete netifaces
-verificar_paquete gunicorn
-verificar_paquete requests
-verificar_paquete dotenv
+wget -q --show-progress -O .env \
+https://github.com/immich-app/immich/releases/latest/download/example.env
 
-# Verificar versión de Werkzeug (ahora será compatible)
-echo -e "\n${BLUE}Verificando versiones de dependencias críticas:${NC}"
-python3 -c "import werkzeug; print(f'   Werkzeug: {werkzeug.__version__}')" 2>/dev/null || echo "   Werkzeug: No instalado"
-python3 -c "import flask; print(f'   Flask: {flask.__version__}')" 2>/dev/null || echo "   Flask: No instalado"
+mkdir -p ./library ./postgres
 
-print_success "Verificación completada"
+# Configurar .env
+sed -i 's|UPLOAD_LOCATION=./library|UPLOAD_LOCATION=./library|g' .env
+sed -i 's|DB_DATA_LOCATION=./postgres|DB_DATA_LOCATION=./postgres|g' .env
+sed -i 's|DB_PASSWORD=postgres|DB_PASSWORD=ImmichSecure2024|g' .env
+sed -i "s|# TZ=Etc/UTC|TZ=$ZONA|g" .env
+
+print_info "🚀 Iniciando contenedores de Immich..."
+docker compose up -d
+
+print_success "Immich instalado"
+
+# ==================== CREAR SERVICIO SYSTEMD PARA INICIO AUTOMÁTICO ====================
+print_step "CONFIGURANDO INICIO AUTOMÁTICO DEL PANEL"
+
+# Crear archivo de servicio systemd
+SERVICE_FILE="/etc/systemd/system/myxsi-panel.service"
+
+sudo tee $SERVICE_FILE > /dev/null << EOF
+[Unit]
+Description=Panel Myxsi - Sistema de Administración
+After=network.target network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+User=$USER
+WorkingDirectory=$DIR_APP
+ExecStart=/usr/bin/python3 $RUTA_APP
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=myxsi-panel
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Environment="TZ=$ZONA"
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Recargar systemd y habilitar servicio
+sudo systemctl daemon-reload
+sudo systemctl enable myxsi-panel.service
+print_success "Servicio systemd creado y habilitado"
+print_success "El panel se iniciará AUTOMÁTICAMENTE al encender el sistema"
+
+# ==================== CREAR SCRIPT DE INICIO MANUAL ====================
+print_step "CREANDO SCRIPT DE INICIO MANUAL"
+
+cat > ~/start_myxsi.sh << EOF
+#!/bin/bash
+# Panel Myxsi - Inicio manual
+cd "$DIR_APP"
+python3 "$RUTA_APP"
+EOF
+
+chmod +x ~/start_myxsi.sh
+print_success "Script manual creado: ~/start_myxsi.sh"
 
 # ==================== CONFIGURAR FIREWALL ====================
 print_step "CONFIGURANDO FIREWALL"
@@ -251,184 +476,104 @@ sudo ufw allow 2283/tcp comment 'Immich' 2>/dev/null || true
 
 print_success "Firewall configurado (puertos: 22, 5000, 2283)"
 
-# ==================== CREAR ALIAS PARA EJECUTAR ====================
+# ==================== CREAR COMANDOS ÚTILES ====================
 print_step "CREANDO COMANDOS ÚTILES"
 
 if ! grep -q "alias myxsi" ~/.bashrc 2>/dev/null; then
-    cat >> ~/.bashrc << 'EOF'
+    cat >> ~/.bashrc << EOF
 
 # ========== Panel Myxsi - Comandos útiles ==========
-alias myxsi-start='cd ~/panel-myxsi && python3 app.py'
-alias myxsi-status='ps aux | grep "python3.*app.py" | grep -v grep'
-alias myxsi-stop='pkill -f "python3.*app.py"'
+alias myxsi-start='sudo systemctl start myxsi-panel'
+alias myxsi-stop='sudo systemctl stop myxsi-panel'
+alias myxsi-restart='sudo systemctl restart myxsi-panel'
+alias myxsi-status='sudo systemctl status myxsi-panel'
+alias myxsi-logs='sudo journalctl -u myxsi-panel -f'
+alias myxsi-manual='~/start_myxsi.sh'
+alias immich-start='cd ~/immich-app && docker compose up -d'
+alias immich-stop='cd ~/immich-app && docker compose down'
+alias immich-status='docker ps | grep immich'
+alias immich-logs='cd ~/immich-app && docker compose logs -f'
 EOF
     print_success "Alias agregados a ~/.bashrc"
 else
     print_success "Alias ya existentes"
 fi
 
-# ==================== INFORMACIÓN DEL SISTEMA ====================
-print_step "INFORMACIÓN DEL SISTEMA"
-
-echo -e "${CYAN}Versiones instaladas:${NC}"
-echo "   🐍 Python: $(python3 --version)"
-echo "   📦 Pip: $(pip3 --version)"
-echo "   💻 Node.js: $(node --version 2>/dev/null || echo 'No instalado')"
-echo "   🐳 Docker: $(docker --version 2>/dev/null || echo 'No instalado')"
-echo "   🔥 UFW: $(ufw --version 2>/dev/null | head -1 || echo 'No instalado')"
-
-# Obtener IP
+# ==================== INFORMACIÓN FINAL ====================
 IP=$(hostname -I | awk '{print $1}')
 if [ -z "$IP" ]; then
     IP="IP-DE-TU-MAQUINA"
 fi
 
-# ==================== FINALIZAR ====================
-echo ""
-echo -e "${GREEN}════════════════════════════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}✅ INSTALACIÓN COMPLETADA EXITOSAMENTE!${NC}"
-echo -e "${GREEN}════════════════════════════════════════════════════════════════════════════${NC}"
-echo ""
-echo -e "${CYAN}📦 DEPENDENCIAS INSTALADAS DIRECTAMENTE EN EL SISTEMA:${NC}"
-echo "   ✅ Python 3 + pip3 + dev + full"
-echo "   ✅ Flask + Flask-SocketIO + Eventlet (versiones compatibles)"
-echo "   ✅ Psutil + Netifaces + Requests"
-echo "   ✅ Python-PAM (autenticación de usuarios)"
-echo "   ✅ Gunicorn + Gevent (servidor producción)"
-echo "   ✅ Node.js"
-echo "   ✅ Docker + Docker Compose"
-echo "   ✅ Hostapd + Dnsmasq (punto de acceso WiFi)"
-echo "   ✅ Wirelesstools + WPA Supplicant"
-echo "   ✅ UFW Firewall"
-echo "   ✅ GCC + Make + Build Essential"
-echo ""
-echo -e "${CYAN}🚀 CÓMO EJECUTAR TU PANEL:${NC}"
-echo "   1. Ve a la carpeta donde está tu app.py:"
-echo "      cd /ruta/donde/esta/tu/panel"
-echo ""
-echo "   2. Ejecuta el panel:"
-echo "      python3 app.py"
-echo ""
-echo "   3. O usa Gunicorn (recomendado):"
-echo "      gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:5000 app:app"
-echo ""
-echo "   4. O usa los alias creados:"
-echo "      myxsi-start  # Inicia el panel"
-echo "      myxsi-stop   # Detiene el panel"
-echo "      myxsi-status # Ver estado"
-echo ""
-echo -e "${CYAN}🌐 ACCESO AL PANEL:${NC}"
-echo "   http://$IP:5000"
-echo ""
-echo -e "${CYAN}📸 PARA INSTALAR IMMICH (OPCIONAL):${NC}"
-echo "   mkdir ~/immich && cd ~/immich"
-echo "   wget -O docker-compose.yml https://github.com/immich-app/immich/releases/latest/download/docker-compose.yml"
-echo "   wget -O .env https://github.com/immich-app/immich/releases/latest/download/example.env"
-echo "   nano .env  # Configurar UPLOAD_LOCATION y DB_PASSWORD"
-echo "   docker compose up -d"
-echo ""
-echo -e "${YELLOW}⚠️  NOTAS IMPORTANTES:${NC}"
-echo "   1. Se usó --break-system-packages para instalar directamente en el sistema"
-echo "   2. Todos los paquetes están instalados GLOBALMENTE (no entorno virtual)"
-echo "   3. Las versiones son COMPATIBLES (Flask y Werkzeug ahora funcionan juntos)"
-echo "   4. Para verificar: python3 -c 'import flask, psutil, pam; print(\"OK\")'"
-echo "   5. Si Docker no funciona, cierra sesión y vuelve a entrar"
-echo ""
-echo -e "${GREEN}════════════════════════════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}🎉 SISTEMA COMPLETO - SIN CONFLICTOS DE VERSIONES! 🎉${NC}"
-echo -e "${GREEN}════════════════════════════════════════════════════════════════════════════${NC}"
-echo ""
-
-# ==================== PREGUNTAR SI QUIERE PROBAR ====================
-echo -e "${YELLOW}¿Quieres probar que todas las dependencias funcionan? (s/n)${NC}"
-read -p "➡️ " probar
-
-if [[ "$probar" == "s" || "$probar" == "S" ]]; then
-    echo -e "\n${BLUE}Probando dependencias Python...${NC}\n"
-    
-    python3 << 'EOF'
-import sys
-success = True
-
-print("📦 Verificando importaciones:")
-try:
-    import flask
-    print(f"  ✅ Flask {flask.__version__}")
-except Exception as e:
-    print(f"  ❌ Flask: {e}")
-    success = False
-
-try:
-    import flask_socketio
-    print("  ✅ Flask-SocketIO")
-except Exception as e:
-    print(f"  ❌ Flask-SocketIO: {e}")
-    success = False
-
-try:
-    import eventlet
-    print("  ✅ Eventlet")
-except Exception as e:
-    print(f"  ❌ Eventlet: {e}")
-    success = False
-
-try:
-    import werkzeug
-    print(f"  ✅ Werkzeug {werkzeug.__version__}")
-except Exception as e:
-    print(f"  ❌ Werkzeug: {e}")
-    success = False
-
-try:
-    import psutil
-    print(f"  ✅ Psutil {psutil.__version__}")
-except Exception as e:
-    print(f"  ❌ Psutil: {e}")
-    success = False
-
-try:
-    import pam
-    print("  ✅ Python-PAM")
-except Exception as e:
-    print(f"  ❌ Python-PAM: {e}")
-    success = False
-
-try:
-    import netifaces
-    print("  ✅ Netifaces")
-except Exception as e:
-    print(f"  ❌ Netifaces: {e}")
-    success = False
-
-try:
-    import gunicorn
-    print(f"  ✅ Gunicorn {gunicorn.__version__}")
-except Exception as e:
-    print(f"  ❌ Gunicorn: {e}")
-    success = False
-
-if success:
-    print("\n✅ TODAS las dependencias funcionan correctamente!")
-    print("✅ No hay conflictos entre Flask y Werkzeug")
-else:
-    print("\n⚠️ Algunas dependencias fallaron, revisa los mensajes arriba")
-EOF
-    
-    echo -e "\n${BLUE}Probando servicios del sistema...${NC}"
-    
-    if command -v docker &> /dev/null; then
-        echo "  ✅ Docker: $(docker --version)"
-    else
-        echo "  ❌ Docker no encontrado"
-    fi
-    
-    if command -v node &> /dev/null; then
-        echo "  ✅ Node.js: $(node --version)"
-    else
-        echo "  ❌ Node.js no encontrado"
-    fi
-    
-    print_success "\nPruebas completadas"
+# Verificar estado de Immich
+sleep 3
+IMMICH_STATUS=""
+if docker ps | grep -q immich; then
+    IMMICH_STATUS="✅ Activo"
+else
+    IMMICH_STATUS="⏳ Iniciando (espera 1-2 minutos)"
 fi
 
-echo -e "${MAGENTA}✨ ¡INSTALACIÓN DIRECTA COMPLETADA! Todas las dependencias están listas y son compatibles. ✨${NC}"
+echo ""
+echo -e "${GREEN}════════════════════════════════════════════════════════════════════════════${NC}"
+echo -e "${GREEN}✅ INSTALACIÓN COMPLETA FINALIZADA EXITOSAMENTE!${NC}"
+echo -e "${GREEN}════════════════════════════════════════════════════════════════════════════${NC}"
+echo ""
+echo -e "${CYAN}📋 CONFIGURACIÓN:${NC}"
+echo "   🕐 Zona horaria: $ZONA"
+echo "   📁 app.py: $RUTA_APP"
+echo "   📂 Directorio: $DIR_APP"
+echo "   🚀 Inicio automático: ✅ ACTIVADO (systemd)"
+echo ""
+echo -e "${CYAN}🌐 SERVICIOS DISPONIBLES:${NC}"
+echo "   🔧 Panel Myxsi:  http://$IP:5000"
+echo "   📸 Immich:       http://$IP:2283"
+echo ""
+echo -e "${CYAN}⚙️  COMANDOS ÚTILES:${NC}"
+echo "   myxsi-start      - Iniciar el panel"
+echo "   myxsi-stop       - Detener el panel"
+echo "   myxsi-restart    - Reiniciar el panel"
+echo "   myxsi-status     - Ver estado del panel"
+echo "   myxsi-logs       - Ver logs del panel"
+echo "   myxsi-manual     - Iniciar manualmente"
+echo "   immich-start     - Iniciar Immich"
+echo "   immich-stop      - Detener Immich"
+echo "   immich-status    - Ver estado de Immich"
+echo ""
+echo -e "${CYAN}🔧 COMANDOS SYSTEMD:${NC}"
+echo "   sudo systemctl start myxsi-panel    - Iniciar servicio"
+echo "   sudo systemctl stop myxsi-panel     - Detener servicio"
+echo "   sudo systemctl restart myxsi-panel  - Reiniciar servicio"
+echo "   sudo systemctl status myxsi-panel   - Ver estado"
+echo "   sudo journalctl -u myxsi-panel -f   - Ver logs en tiempo real"
+echo ""
+echo -e "${YELLOW}⚠️  NOTAS IMPORTANTES:${NC}"
+echo "   1. El panel se inicia AUTOMÁTICAMENTE con el sistema"
+echo "   2. Immich se inicia manualmente con: immich-start"
+echo "   3. Para aplicar cambios: source ~/.bashrc o nueva terminal"
+echo "   4. Credenciales del panel: Usuario y contraseña del sistema"
+echo "   5. Immich tarda 1-2 minutos en iniciar completamente"
+echo ""
+echo -e "${GREEN}════════════════════════════════════════════════════════════════════════════${NC}"
+echo -e "${GREEN}🎉 ¡TODO LISTO! El panel se iniciará automáticamente al encender la PC 🎉${NC}"
+echo -e "${GREEN}════════════════════════════════════════════════════════════════════════════${NC}"
+echo ""
+
+# ==================== PREGUNTAR SI QUIERE INICIAR AHORA ====================
+echo -e "${YELLOW}¿Quieres iniciar el panel AHORA? (s/n)${NC}"
+read -p "➡️ " iniciar
+
+if [[ "$iniciar" == "s" || "$iniciar" == "S" ]]; then
+    echo -e "\n${BLUE}Iniciando Panel Myxsi...${NC}"
+    sudo systemctl start myxsi-panel
+    sleep 3
+    echo -e "${GREEN}✅ Panel iniciado!${NC}"
+    echo -e "${CYAN}Accede a: http://$IP:5000${NC}"
+    echo ""
+    echo -e "${YELLOW}Para ver los logs: myxsi-logs${NC}"
+else
+    echo -e "\n${BLUE}El panel se iniciará automáticamente cuando reinicies el sistema${NC}"
+    echo -e "${BLUE}Puedes iniciarlo manualmente con: myxsi-start${NC}"
+fi
+
+echo -e "\n${MAGENTA}✨ ¡INSTALACIÓN COMPLETADA! ✨${NC}"
