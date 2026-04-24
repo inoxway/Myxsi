@@ -107,7 +107,7 @@
 ## 🚀 Instalación Rápida
 
 ### Sistema permitido
-- Debian 12+ / Kali Linux / Orange pi Zero 3
+- Debian 12+ / Orange pi Zero 3
 - Python 3.9+
 - Conexión a internet
 - Usuario con permisos sudo
@@ -116,7 +116,7 @@
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/yourusername/myxsi.git
+git clone https://github.com/inoxway/Myxsi
 cd myxsi
 
 # Dar permisos al instalador
