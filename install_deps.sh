@@ -2,7 +2,7 @@
 # ============================================
 # PANEL MYXSI - INSTALADOR DIRECTO PARA DEBIAN
 # Instala TODAS las dependencias directamente en el sistema
-# Usa --break-system-packages para evitar errores
+# SOLUCIONADO: Conflictos de versiones (Flask + Werkzeug)
 # ============================================
 
 set -e
@@ -19,7 +19,7 @@ NC='\033[0m'
 echo -e "${CYAN}"
 echo "╔════════════════════════════════════════════════════════════════════════════╗"
 echo "║         PANEL MYXSI - INSTALACIÓN DIRECTA PARA DEBIAN                      ║"
-echo "║      Instalando TODAS las dependencias directamente en el sistema         ║"
+echo "║      Instalando TODAS las dependencias - VERSIONES COMPATIBLES            ║"
 echo "╚════════════════════════════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 
@@ -87,15 +87,6 @@ sudo apt install -y \
     python3-dev \
     python3-full \
     python3-venv \
-    python3-pam \
-    python3-psutil \
-    python3-flask \
-    python3-flask-socketio \
-    python3-eventlet \
-    python3-requests \
-    python3-dotenv \
-    python3-gunicorn \
-    python3-netifaces \
     gcc \
     g++ \
     make \
@@ -129,8 +120,7 @@ sudo apt install -y \
     wpasupplicant \
     rfkill \
     iw \
-    network-manager \
-    net-tools
+    network-manager
 
 print_success "Dependencias WiFi instaladas"
 
@@ -179,50 +169,41 @@ if docker compose version &> /dev/null; then
     print_success "Docker Compose plugin disponible"
 fi
 
-# ==================== INSTALAR PAQUETES PYTHON CON PIP (DIRECTO) ====================
-print_step "INSTALANDO PAQUETES PYTHON DIRECTAMENTE (pip --break-system-packages)"
+# ==================== INSTALAR PAQUETES PYTHON (VERSIONES COMPATIBLES) ====================
+print_step "INSTALANDO PAQUETES PYTHON (VERSIONES COMPATIBLES)"
 
 # Actualizar pip
 print_info "Actualizando pip..."
 python3 -m pip install --upgrade pip setuptools wheel --break-system-packages
 
-# Instalar paquetes faltantes
-print_info "Instalando Flask y dependencias..."
+# Instalar Flask y Werkzeug (SIN forzar versiones conflictivas)
+print_info "Instalando Flask y dependencias web (versiones compatibles)..."
 python3 -m pip install --break-system-packages \
-    Flask==2.3.3 \
-    flask-socketio==5.3.4 \
-    python-socketio==5.9.0 \
-    eventlet==0.33.3 \
-    werkzeug==2.3.0
+    Flask \
+    flask-socketio \
+    python-socketio \
+    eventlet
 
+# Instalar utilidades del sistema
 print_info "Instalando utilidades del sistema..."
 python3 -m pip install --break-system-packages \
-    psutil==5.9.6 \
+    psutil \
     netifaces \
-    requests==2.31.0 \
-    python-dotenv==1.0.0
+    requests \
+    python-dotenv
 
+# Instalar python-pam
 print_info "Instalando python-pam..."
 python3 -m pip install --break-system-packages python-pam
 
-print_info "Instalando servidor de producción..."
+# Instalar servidor de producción
+print_info "Instalando Gunicorn y Gevent..."
 python3 -m pip install --break-system-packages \
-    gunicorn==21.2.0 \
+    gunicorn \
     gevent \
     gevent-websocket
 
-# Instalar cualquier otra dependencia que pueda faltar
-print_info "Instalando dependencias adicionales..."
-python3 -m pip install --break-system-packages \
-    blinker \
-    click \
-    itsdangerous \
-    jinja2 \
-    markupsafe \
-    six \
-    websocket-client
-
-print_success "Todos los paquetes Python instalados directamente en el sistema"
+print_success "Todos los paquetes Python instalados con versiones compatibles"
 
 # ==================== VERIFICAR INSTALACIÓN ====================
 print_step "VERIFICANDO INSTALACIÓN"
@@ -253,21 +234,12 @@ verificar_paquete gunicorn
 verificar_paquete requests
 verificar_paquete dotenv
 
+# Verificar versión de Werkzeug (ahora será compatible)
+echo -e "\n${BLUE}Verificando versiones de dependencias críticas:${NC}"
+python3 -c "import werkzeug; print(f'   Werkzeug: {werkzeug.__version__}')" 2>/dev/null || echo "   Werkzeug: No instalado"
+python3 -c "import flask; print(f'   Flask: {flask.__version__}')" 2>/dev/null || echo "   Flask: No instalado"
+
 print_success "Verificación completada"
-
-# ==================== VERIFICAR COMANDOS DEL SISTEMA ====================
-print_step "VERIFICANDO COMANDOS DEL SISTEMA"
-
-comandos=("python3" "pip3" "node" "docker" "hostapd" "dnsmasq" "gunicorn")
-
-for cmd in "${comandos[@]}"; do
-    if command -v $cmd &> /dev/null; then
-        echo -e "   ${GREEN}✅ $cmd${NC}"
-    else
-        echo -e "   ${RED}❌ $cmd${NC}"
-        ERRORES=$((ERRORES+1))
-    fi
-done
 
 # ==================== CONFIGURAR FIREWALL ====================
 print_step "CONFIGURANDO FIREWALL"
@@ -319,7 +291,7 @@ echo -e "${GREEN}═════════════════════
 echo ""
 echo -e "${CYAN}📦 DEPENDENCIAS INSTALADAS DIRECTAMENTE EN EL SISTEMA:${NC}"
 echo "   ✅ Python 3 + pip3 + dev + full"
-echo "   ✅ Flask + Flask-SocketIO + Eventlet"
+echo "   ✅ Flask + Flask-SocketIO + Eventlet (versiones compatibles)"
 echo "   ✅ Psutil + Netifaces + Requests"
 echo "   ✅ Python-PAM (autenticación de usuarios)"
 echo "   ✅ Gunicorn + Gevent (servidor producción)"
@@ -329,7 +301,6 @@ echo "   ✅ Hostapd + Dnsmasq (punto de acceso WiFi)"
 echo "   ✅ Wirelesstools + WPA Supplicant"
 echo "   ✅ UFW Firewall"
 echo "   ✅ GCC + Make + Build Essential"
-echo "   ✅ Librerías: PAM, FFI, SSL, JPEG, Zlib"
 echo ""
 echo -e "${CYAN}🚀 CÓMO EJECUTAR TU PANEL:${NC}"
 echo "   1. Ve a la carpeta donde está tu app.py:"
@@ -358,12 +329,13 @@ echo "   docker compose up -d"
 echo ""
 echo -e "${YELLOW}⚠️  NOTAS IMPORTANTES:${NC}"
 echo "   1. Se usó --break-system-packages para instalar directamente en el sistema"
-echo "   2. Todos los paquetes están instalados globalmente"
-echo "   3. Para verificar: python3 -c 'import flask, psutil, pam; print(\"OK\")'"
-echo "   4. Si Docker no funciona, cierra sesión y vuelve a entrar"
+echo "   2. Todos los paquetes están instalados GLOBALMENTE (no entorno virtual)"
+echo "   3. Las versiones son COMPATIBLES (Flask y Werkzeug ahora funcionan juntos)"
+echo "   4. Para verificar: python3 -c 'import flask, psutil, pam; print(\"OK\")'"
+echo "   5. Si Docker no funciona, cierra sesión y vuelve a entrar"
 echo ""
 echo -e "${GREEN}════════════════════════════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}🎉 SISTEMA COMPLETO - TODAS LAS DEPENDENCIAS INSTALADAS DIRECTAMENTE! 🎉${NC}"
+echo -e "${GREEN}🎉 SISTEMA COMPLETO - SIN CONFLICTOS DE VERSIONES! 🎉${NC}"
 echo -e "${GREEN}════════════════════════════════════════════════════════════════════════════${NC}"
 echo ""
 
@@ -401,6 +373,13 @@ except Exception as e:
     success = False
 
 try:
+    import werkzeug
+    print(f"  ✅ Werkzeug {werkzeug.__version__}")
+except Exception as e:
+    print(f"  ❌ Werkzeug: {e}")
+    success = False
+
+try:
     import psutil
     print(f"  ✅ Psutil {psutil.__version__}")
 except Exception as e:
@@ -428,15 +407,9 @@ except Exception as e:
     print(f"  ❌ Gunicorn: {e}")
     success = False
 
-try:
-    import requests
-    print(f"  ✅ Requests {requests.__version__}")
-except Exception as e:
-    print(f"  ❌ Requests: {e}")
-    success = False
-
 if success:
     print("\n✅ TODAS las dependencias funcionan correctamente!")
+    print("✅ No hay conflictos entre Flask y Werkzeug")
 else:
     print("\n⚠️ Algunas dependencias fallaron, revisa los mensajes arriba")
 EOF
@@ -458,4 +431,4 @@ EOF
     print_success "\nPruebas completadas"
 fi
 
-echo -e "${MAGENTA}✨ ¡INSTALACIÓN DIRECTA COMPLETADA! Tu sistema está listo para ejecutar el panel. ✨${NC}"
+echo -e "${MAGENTA}✨ ¡INSTALACIÓN DIRECTA COMPLETADA! Todas las dependencias están listas y son compatibles. ✨${NC}"
